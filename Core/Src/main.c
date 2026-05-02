@@ -53,13 +53,24 @@ DMA_HandleTypeDef hdma_i2c2_rx;
 TIM_HandleTypeDef htim6;
 
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
 uint8_t Rx_buffer[2];
 uint16_t value_raw=0;
 float normal_value=0;
+float sensor_readings[5];
 uint8_t dma_ready =0;
 uint8_t read_sensor = 0;
+float sum_sensor=0;
+float uart_min;
+float uart_max;
+float oled_min;
+float oled_max;
+char msg[50];
+float average_sensor;
+float sum_sensor_oled;
+Statechart sc_handle; // Statechart pointer
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -77,6 +88,98 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+
+
+ void statechart_read_I2C_Sensors( Statechart* handle){
+	 HAL_I2C_Mem_Read_DMA(&hi2c2, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, Rx_buffer, 2);
+ }
+ void statechart_check_min_max_pc( Statechart* handle){
+
+ }
+ void statechart_save_average_data( Statechart* handle){
+
+ }
+ void statechart_send_data_uart( Statechart* handle){
+	 int len = snprintf(msg, sizeof(msg), "\r\nCh1: %.4f\r\nMin: %.4f\r\nMax: %.4f\r\n", average_sensor, uart_min, uart_max);
+	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
+	 sum_sensor=0;
+
+ }
+ void statechart_check_min_max_oled( Statechart* handle){
+
+ }
+ void statechart_send_data_oled( Statechart* handle){
+	 float average_oled=sum_sensor_oled/10;
+	 char ch1_value[50];
+	 char ch1_min[50];
+	 char ch1_max[50];
+	 SSD1306_Clear();
+	 sprintf (ch1_value, "%.4f", average_oled);
+	 sprintf (ch1_min, "%.4f", oled_min);
+	 sprintf (ch1_max, "%.4f", oled_max);
+
+	 SSD1306_GotoXY (5,0); // goto 0, 0
+	 SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
+	 SSD1306_GotoXY (35,0); // goto 0, 0
+	 SSD1306_Puts (ch1_value, &Font_7x10, 1); // print Ch1:
+	 SSD1306_GotoXY (110,0); // goto 0, 0
+	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+
+	 SSD1306_GotoXY (5, 10);
+	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
+	 SSD1306_GotoXY (35, 10);
+	 SSD1306_Puts (ch1_min, &Font_7x10, 1); // print Hello
+	 SSD1306_GotoXY (110,10); // goto 0, 0
+	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+
+	 SSD1306_GotoXY (5, 20);
+	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
+	 SSD1306_GotoXY (35, 20);
+	 SSD1306_Puts (ch1_max, &Font_7x10, 1); // print Hello
+	 SSD1306_GotoXY (110,20); // goto 0, 0
+	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	 SSD1306_UpdateScreen();
+	 sum_sensor_oled=0;
+
+ }
+ void statechart_zero_pc_data( Statechart* handle){
+
+ }
+ void statechart_zero_oled_data( Statechart* handle){
+
+ }
+ void statechart_save_i2c_samples( Statechart* handle, const sc_integer sample_no){
+	 value_raw = Rx_buffer[0] | (Rx_buffer[1] << 8);
+	 normal_value = value_raw * 0.1344;
+	 sum_sensor=sum_sensor+normal_value;
+	 sensor_readings[sample_no]=normal_value;
+	 if(sample_no==0){
+		 uart_min=uart_max=normal_value;
+	 }
+	 else if(normal_value<uart_min){
+		 uart_min=normal_value;
+	 }
+	 else if(normal_value>uart_max){
+		 uart_max=normal_value;
+	 }
+ }
+ void statechart_save_data_oled( Statechart* handle, const sc_integer iterration_number){
+	 average_sensor = sum_sensor/5;
+	 sum_sensor_oled = sum_sensor_oled+average_sensor;
+	 if(iterration_number==0){
+		 oled_min=uart_min;
+		 oled_max=uart_max;
+	 }
+	 else if (uart_min<oled_min){
+		 oled_min=uart_min;
+	 }
+	 if (uart_max>oled_max){
+		 oled_max=uart_max;
+	 }
+ }
 /* USER CODE END 0 */
 
 /**
@@ -154,6 +257,14 @@ int main(void)
   uint16_t config = VEML7700_GAIN_2 | VEML7700_IT_25MS;
   HAL_I2C_Mem_Write(&hi2c2, VEML7700_ADDR, VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&config, 2, 10);
 
+
+
+
+
+
+  statechart_init(&sc_handle); //Inicializuoti būtenų automatą
+  statechart_enter(&sc_handle); //Pradėti vykdyti būsenų automatą
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -161,20 +272,19 @@ int main(void)
   while (1)
   {
 	  if(read_sensor==1){
-	 		  HAL_I2C_Mem_Read_DMA(&hi2c2, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, Rx_buffer, 2);
+
 	 		  read_sensor=0;
 	 	  }
 	 	  if(dma_ready==1){
-	 		  char msg[32];
-	 		  normal_value = value_raw * 0.1344;
-	 		  int len = snprintf(msg, sizeof(msg), "Lux: %.4f\r\n", normal_value);
-	 		  HAL_UART_Transmit(&huart2, (uint8_t*)msg, len, 100);
+
+
 	 		  dma_ready=0;
 	 	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
+  statechart_exit(&sc_handle);
   /* USER CODE END 3 */
 }
 
@@ -453,13 +563,13 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-    value_raw = Rx_buffer[0] | (Rx_buffer[1] << 8);
-    dma_ready = 1;
+
+	statechart_raise_i2c_callback_sensors(&sc_handle);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM6) {
-    	read_sensor=1;
+    	statechart_raise_timer_interrupt(&sc_handle);
     }
 }
 /* USER CODE END 4 */
