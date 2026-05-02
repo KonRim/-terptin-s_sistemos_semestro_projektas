@@ -59,6 +59,7 @@ uint8_t Rx_buffer[2];
 uint16_t value_raw=0;
 float normal_value=0;
 uint8_t dma_ready =0;
+uint8_t read_sensor = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,7 +114,7 @@ int main(void)
   MX_TIM6_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_Base_Start_IT(&htim6);
 
   SSD1306_Init (); // initialise the display
 
@@ -159,16 +160,19 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if(read_sensor==1){
+	 		  HAL_I2C_Mem_Read_DMA(&hi2c2, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, Rx_buffer, 2);
+	 		  read_sensor=0;
+	 	  }
+	 	  if(dma_ready==1){
+	 		  char msg[32];
+	 		  normal_value = value_raw * 0.1344;
+	 		  int len = snprintf(msg, sizeof(msg), "Lux: %.4f\r\n", normal_value);
+	 		  HAL_UART_Transmit(&huart2, (uint8_t*)msg, len, 100);
+	 		  dma_ready=0;
+	 	  }
     /* USER CODE END WHILE */
-	  HAL_I2C_Mem_Read_DMA(&hi2c2, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, Rx_buffer, 2);
-	  if(dma_ready==1){
-		  char msg[32];
-		  normal_value = value_raw * 0.1344;
-		  int len = snprintf(msg, sizeof(msg), "Lux: %.2f\r\n", normal_value);
-		  HAL_UART_Transmit(&huart2, (uint8_t*)msg, len, 100);
-		  dma_ready=0;
-		  HAL_Delay(50);
-	  }
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -336,7 +340,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 47999;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 39;
+  htim6.Init.Period = 49;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -451,6 +455,12 @@ static void MX_GPIO_Init(void)
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
     value_raw = Rx_buffer[0] | (Rx_buffer[1] << 8);
     dma_ready = 1;
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM6) {
+    	read_sensor=1;
+    }
 }
 /* USER CODE END 4 */
 
