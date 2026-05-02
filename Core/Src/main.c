@@ -18,6 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "ssd1306.h"
+#include "fonts.h"
+#include "stdio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -102,6 +105,39 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  SSD1306_Init (); // initialise the display
+
+  SSD1306_GotoXY (5,0); // goto 0, 0
+  SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
+  SSD1306_GotoXY (110,0); // goto 0, 0
+  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+  SSD1306_GotoXY (5, 10);
+  SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
+  SSD1306_GotoXY (110,10); // goto 0, 0
+  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+  SSD1306_GotoXY (5, 20);
+  SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
+  SSD1306_GotoXY (110,20); // goto 0, 0
+  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+  SSD1306_GotoXY (5, 33);
+  SSD1306_Puts ("Ch2:", &Font_7x10, 1); // print Hello
+  SSD1306_GotoXY (110,33); // goto 0, 0
+  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+  SSD1306_GotoXY (5, 43);
+  SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
+  SSD1306_GotoXY (110,43); // goto 0, 0
+  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+  SSD1306_GotoXY (5, 53);
+  SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
+  SSD1306_GotoXY (110,53); // goto 0, 0
+  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+  SSD1306_UpdateScreen(); // update screen
   /* USER CODE END 2 */
 
   /* Infinite loop */
