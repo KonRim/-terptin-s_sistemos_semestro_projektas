@@ -55,6 +55,8 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern DMA_HandleTypeDef hdma_i2c1_rx;
+extern DMA_HandleTypeDef hdma_i2c2_rx;
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
 /* USER CODE BEGIN EV */
@@ -140,6 +142,34 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f0xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles DMA1 channel 2 to 3 and DMA2 channel 1 to 2 interrupts.
+  */
+void DMA1_Ch2_3_DMA2_Ch1_2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Ch2_3_DMA2_Ch1_2_IRQn 0 */
+
+  /* USER CODE END DMA1_Ch2_3_DMA2_Ch1_2_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_i2c1_rx);
+  /* USER CODE BEGIN DMA1_Ch2_3_DMA2_Ch1_2_IRQn 1 */
+
+  /* USER CODE END DMA1_Ch2_3_DMA2_Ch1_2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel 4 to 7 and DMA2 channel 3 to 5 interrupts.
+  */
+void DMA1_Ch4_7_DMA2_Ch3_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Ch4_7_DMA2_Ch3_5_IRQn 0 */
+
+  /* USER CODE END DMA1_Ch4_7_DMA2_Ch3_5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_i2c2_rx);
+  /* USER CODE BEGIN DMA1_Ch4_7_DMA2_Ch3_5_IRQn 1 */
+
+  /* USER CODE END DMA1_Ch4_7_DMA2_Ch3_5_IRQn 1 */
+}
 
 /**
   * @brief This function handles I2C1 event global interrupt / I2C1 wake-up interrupt through EXTI line 23.

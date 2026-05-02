@@ -18,13 +18,15 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "ssd1306.h"
-#include "fonts.h"
-#include "stdio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "fonts.h"
+#include "ssd1306.h"
+#include "VEML7700_driver.h"
+#include "stdio.h"
+#include "Statechart.h"
+#include "Statechart_required.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,18 +47,24 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
+DMA_HandleTypeDef hdma_i2c1_rx;
+DMA_HandleTypeDef hdma_i2c2_rx;
 
 TIM_HandleTypeDef htim6;
 
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint8_t Rx_buffer[2];
+uint16_t value_raw=0;
+float normal_value=0;
+uint8_t dma_ready =0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_TIM6_Init(void);
@@ -99,11 +107,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_TIM6_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+
 
   SSD1306_Init (); // initialise the display
 
@@ -138,6 +148,11 @@ int main(void)
   SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
   SSD1306_UpdateScreen(); // update screen
+
+
+  uint16_t config = VEML7700_GAIN_2 | VEML7700_IT_25MS;
+  HAL_I2C_Mem_Write(&hi2c2, VEML7700_ADDR, VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&config, 2, 10);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -145,8 +160,15 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_UART_Transmit(&huart2, (uint8_t *)("------ \r\n"), 9, UART_TIMEOUT);
-	  HAL_Delay(1000);
+	  HAL_I2C_Mem_Read_DMA(&hi2c2, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, Rx_buffer, 2);
+	  if(dma_ready==1){
+		  char msg[32];
+		  normal_value = value_raw * 0.1344;
+		  int len = snprintf(msg, sizeof(msg), "Lux: %.2f\r\n", normal_value);
+		  HAL_UART_Transmit(&huart2, (uint8_t*)msg, len, 100);
+		  dma_ready=0;
+		  HAL_Delay(50);
+	  }
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -368,6 +390,25 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Ch2_3_DMA2_Ch1_2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Ch2_3_DMA2_Ch1_2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Ch2_3_DMA2_Ch1_2_IRQn);
+  /* DMA1_Ch4_7_DMA2_Ch3_5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Ch4_7_DMA2_Ch3_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Ch4_7_DMA2_Ch3_5_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -407,7 +448,10 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
+    value_raw = Rx_buffer[0] | (Rx_buffer[1] << 8);
+    dma_ready = 1;
+}
 /* USER CODE END 4 */
 
 /**
