@@ -37,6 +37,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define UART_TIMEOUT 1000
+#define SAMPLE_NUMBER  4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,6 +52,7 @@ DMA_HandleTypeDef hdma_i2c1_rx;
 DMA_HandleTypeDef hdma_i2c2_rx;
 
 TIM_HandleTypeDef htim6;
+TIM_HandleTypeDef htim7;
 
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_tx;
@@ -69,7 +71,7 @@ float    uart_min[2];
 float    uart_max[2];
 int uart_counter=0;
 
-float sensor_readings[2][5];
+float sensor_readings[2][SAMPLE_NUMBER];
 uint8_t dma_ready =0;
 uint8_t read_sensor = 0;
 
@@ -80,6 +82,7 @@ float oled_max[2];
 char msg[200];
 float average_sensor[2];
 float sum_sensor_oled[2];
+char value[30];
 Statechart sc_handle; // Statechart pointer
 /* USER CODE END PV */
 
@@ -91,6 +94,7 @@ static void MX_I2C1_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_TIM7_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -112,6 +116,8 @@ static void MX_USART2_UART_Init(void);
 	 int len = snprintf(msg, sizeof(msg), "\r\nCh1: %.4f\r\nMin: %.4f\r\nMax: %.4f \r\nCh2: %.4f\r\nMin: %.4f\r\nMax: %.4f\r\nUART counter %d\r\n ", average_sensor[0], uart_min[0], uart_max[0], average_sensor[1], uart_min[1], uart_max[1],uart_counter);
 	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	 sum_sensor[0]=sum_sensor[1]=0;
+
+
 
  }
  void statechart_check_min_max_oled( Statechart* handle){
@@ -183,8 +189,14 @@ static void MX_USART2_UART_Init(void);
 
 
 	 SSD1306_UpdateScreen();
+
 	 sum_sensor_oled[0]=sum_sensor_oled[1]=0;
 
+	/* uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
+	 int len = snprintf(value, sizeof(value), "\r\nTIMER VALUE: %lu \r\n ", timerValue);
+	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
+	 __HAL_TIM_SET_COUNTER(&htim7, 0);
+ 	 */
  }
  void statechart_zero_pc_data( Statechart* handle){
 
@@ -207,10 +219,15 @@ static void MX_USART2_UART_Init(void);
 	         uart_max[i] = normal_value[i];
 	     }
 	 }
+	 /*
+	 uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
+		 int len = snprintf(value, sizeof(value), "\r\nTIMER VALUE: %lu \r\n ", timerValue);
+		 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
+ 	 	 */
  }
  void statechart_save_data_oled( Statechart* handle, const sc_integer iterration_number){
 	 for (int i= 0; i< 2; i++) {
-	     average_sensor[i] = sum_sensor[i] / 5;
+	     average_sensor[i] = sum_sensor[i] / SAMPLE_NUMBER;
 	     sum_sensor_oled[i] = sum_sensor_oled[i] + average_sensor[i];
 
 	     if (iterration_number == 0) {
@@ -260,9 +277,10 @@ int main(void)
   MX_I2C2_Init();
   MX_TIM6_Init();
   MX_USART2_UART_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim6);
-
+  HAL_TIM_Base_Start_IT(&htim7);
   SSD1306_Init (); // initialise the display
 
   SSD1306_GotoXY (5,0); // goto 0, 0
@@ -502,6 +520,44 @@ static void MX_TIM6_Init(void)
   /* USER CODE BEGIN TIM6_Init 2 */
 
   /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
+  * @brief TIM7 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM7_Init(void)
+{
+
+  /* USER CODE BEGIN TIM7_Init 0 */
+
+  /* USER CODE END TIM7_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM7_Init 1 */
+
+  /* USER CODE END TIM7_Init 1 */
+  htim7.Instance = TIM7;
+  htim7.Init.Prescaler = 47999;
+  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim7.Init.Period = 65535;
+  htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM7_Init 2 */
+
+  /* USER CODE END TIM7_Init 2 */
 
 }
 

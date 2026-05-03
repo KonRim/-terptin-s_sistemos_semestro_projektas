@@ -538,7 +538,7 @@ static sc_integer main_region_Save_values_react(Statechart* handle, const sc_int
 		handle->stateConfVector[0] = Statechart_last_state;
 		exact_main_region_Save_values(handle);
 		/* The reactions of state null. */
-		if ((handle->internal.sample_no) == (5))
+		if ((handle->internal.sample_no) == (4))
 		{ 
 			enseq_main_region_Process_data_pc_default(handle);
 		}  else
