@@ -46,7 +46,7 @@ Header of the state machine 'Statechart'.
 #define SC_INVALID_EVENT_VALUE 0
 #endif
 /*! Define number of states in the state enum */
-#define STATECHART_STATE_COUNT 5
+#define STATECHART_STATE_COUNT 6
 
 /*! Define dimension of the state configuration vector for orthogonal states. */
 #define STATECHART_MAX_ORTHOGONAL_STATES 1
@@ -54,9 +54,10 @@ Header of the state machine 'Statechart'.
 /*! Define indices of states in the StateConfVector */
 #define SCVI_STATECHART_MAIN_REGION_WAIT_FOR_TIMER 0
 #define SCVI_STATECHART_MAIN_REGION_READ_SENSORS 0
-#define SCVI_STATECHART_MAIN_REGION_SAVE_VALUES 0
-#define SCVI_STATECHART_MAIN_REGION_PROCESS_DATA_PC 0
-#define SCVI_STATECHART_MAIN_REGION_PROCESS_DATA_OLED 0
+#define SCVI_STATECHART_MAIN_REGION_PROCESS_RECEIVED_VALUES_UART 0
+#define SCVI_STATECHART_MAIN_REGION_SEND_DATA_UART___PROCESS_VALUES_OLED 0
+#define SCVI_STATECHART_MAIN_REGION_SEND_DATA_OLED 0
+#define SCVI_STATECHART_MAIN_REGION_TITLE_SCREEN 0
 
 
 /* 
@@ -65,7 +66,8 @@ Header of the state machine 'Statechart'.
 typedef enum  {
 	Statechart_invalid_event = SC_INVALID_EVENT_VALUE,
 	Statechart_timer_interrupt,
-	Statechart_i2c_callback_sensors
+	Statechart_i2c_callback_sensors,
+	Statechart_user_button
 } StatechartEventID;
 
 /*
@@ -92,9 +94,10 @@ typedef enum
 	Statechart_last_state,
 	Statechart_main_region_Wait_for_timer,
 	Statechart_main_region_Read_sensors,
-	Statechart_main_region_Save_values,
-	Statechart_main_region_Process_data_pc,
-	Statechart_main_region_Process_data_oled
+	Statechart_main_region_Process_received_values_UART,
+	Statechart_main_region_Send_data_UART___Process_values_OLED,
+	Statechart_main_region_Send_data_OLED,
+	Statechart_main_region_Title_screen
 } StatechartStates;
 
 
@@ -103,6 +106,7 @@ struct StatechartIface
 {
 	sc_boolean timer_interrupt_raised;
 	sc_boolean i2c_callback_sensors_raised;
+	sc_boolean user_button_raised;
 };
 
 
@@ -158,6 +162,8 @@ extern void statechart_trigger_without_event(Statechart* handle);
 extern void statechart_raise_timer_interrupt(Statechart* handle);
 /*! Raises the in event 'i2c_callback_sensors' that is defined in the default interface scope. */ 
 extern void statechart_raise_i2c_callback_sensors(Statechart* handle);
+/*! Raises the in event 'user_button' that is defined in the default interface scope. */ 
+extern void statechart_raise_user_button(Statechart* handle);
 
 /*!
  * Checks whether the state machine is active (until 2.4.1 this method was used for states).

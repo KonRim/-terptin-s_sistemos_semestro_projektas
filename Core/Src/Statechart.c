@@ -16,23 +16,27 @@ Implementation of the state machine 'Statechart'
 
 /* prototypes of all internal functions */
 static void enact_main_region_Read_sensors(Statechart* handle);
-static void enact_main_region_Save_values(Statechart* handle);
-static void enact_main_region_Process_data_pc(Statechart* handle);
-static void enact_main_region_Process_data_oled(Statechart* handle);
-static void exact_main_region_Save_values(Statechart* handle);
-static void exact_main_region_Process_data_pc(Statechart* handle);
-static void exact_main_region_Process_data_oled(Statechart* handle);
+static void enact_main_region_Process_received_values_UART(Statechart* handle);
+static void enact_main_region_Send_data_UART___Process_values_OLED(Statechart* handle);
+static void enact_main_region_Send_data_OLED(Statechart* handle);
+static void enact_main_region_Title_screen(Statechart* handle);
+static void exact_main_region_Process_received_values_UART(Statechart* handle);
+static void exact_main_region_Send_data_UART___Process_values_OLED(Statechart* handle);
+static void exact_main_region_Send_data_OLED(Statechart* handle);
+static void exact_main_region_Title_screen(Statechart* handle);
 static void enseq_main_region_Wait_for_timer_default(Statechart* handle);
 static void enseq_main_region_Read_sensors_default(Statechart* handle);
-static void enseq_main_region_Save_values_default(Statechart* handle);
-static void enseq_main_region_Process_data_pc_default(Statechart* handle);
-static void enseq_main_region_Process_data_oled_default(Statechart* handle);
+static void enseq_main_region_Process_received_values_UART_default(Statechart* handle);
+static void enseq_main_region_Send_data_UART___Process_values_OLED_default(Statechart* handle);
+static void enseq_main_region_Send_data_OLED_default(Statechart* handle);
+static void enseq_main_region_Title_screen_default(Statechart* handle);
 static void enseq_main_region_default(Statechart* handle);
 static void exseq_main_region_Wait_for_timer(Statechart* handle);
 static void exseq_main_region_Read_sensors(Statechart* handle);
-static void exseq_main_region_Save_values(Statechart* handle);
-static void exseq_main_region_Process_data_pc(Statechart* handle);
-static void exseq_main_region_Process_data_oled(Statechart* handle);
+static void exseq_main_region_Process_received_values_UART(Statechart* handle);
+static void exseq_main_region_Send_data_UART___Process_values_OLED(Statechart* handle);
+static void exseq_main_region_Send_data_OLED(Statechart* handle);
+static void exseq_main_region_Title_screen(Statechart* handle);
 static void exseq_main_region(Statechart* handle);
 static void react_main_region__entry_Default(Statechart* handle);
 
@@ -42,14 +46,17 @@ static sc_integer main_region_Wait_for_timer_react(Statechart* handle, const sc_
 /*! The reactions of state Read_sensors. */
 static sc_integer main_region_Read_sensors_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state Save_values. */
-static sc_integer main_region_Save_values_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Process_received_values_UART. */
+static sc_integer main_region_Process_received_values_UART_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state Process_data_pc. */
-static sc_integer main_region_Process_data_pc_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Send_data_UART / Process_values_OLED. */
+static sc_integer main_region_Send_data_UART___Process_values_OLED_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state Process_data_oled. */
-static sc_integer main_region_Process_data_oled_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Send_data_OLED. */
+static sc_integer main_region_Send_data_OLED_react(Statechart* handle, const sc_integer transitioned_before);
+
+/*! The reactions of state Title_screen. */
+static sc_integer main_region_Title_screen_react(Statechart* handle, const sc_integer transitioned_before);
 
 
 static void clear_in_events(Statechart* handle);
@@ -182,16 +189,20 @@ sc_boolean statechart_is_state_active(const Statechart* handle, StatechartStates
 			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_REGION_READ_SENSORS] == Statechart_main_region_Read_sensors
 			);
 				break;
-		case Statechart_main_region_Save_values :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_REGION_SAVE_VALUES] == Statechart_main_region_Save_values
+		case Statechart_main_region_Process_received_values_UART :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_REGION_PROCESS_RECEIVED_VALUES_UART] == Statechart_main_region_Process_received_values_UART
 			);
 				break;
-		case Statechart_main_region_Process_data_pc :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_REGION_PROCESS_DATA_PC] == Statechart_main_region_Process_data_pc
+		case Statechart_main_region_Send_data_UART___Process_values_OLED :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_REGION_SEND_DATA_UART___PROCESS_VALUES_OLED] == Statechart_main_region_Send_data_UART___Process_values_OLED
 			);
 				break;
-		case Statechart_main_region_Process_data_oled :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_REGION_PROCESS_DATA_OLED] == Statechart_main_region_Process_data_oled
+		case Statechart_main_region_Send_data_OLED :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_REGION_SEND_DATA_OLED] == Statechart_main_region_Send_data_OLED
+			);
+				break;
+		case Statechart_main_region_Title_screen :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_REGION_TITLE_SCREEN] == Statechart_main_region_Title_screen
 			);
 				break;
 			default:
@@ -205,6 +216,7 @@ static void clear_in_events(Statechart* handle)
 {
 	handle->iface.timer_interrupt_raised = bool_false;
 	handle->iface.i2c_callback_sensors_raised = bool_false;
+	handle->iface.user_button_raised = bool_false;
 }
 
 static void micro_step(Statechart* handle)
@@ -221,19 +233,24 @@ static void micro_step(Statechart* handle)
 			main_region_Read_sensors_react(handle,-1);
 			break;
 		}
-		case Statechart_main_region_Save_values :
+		case Statechart_main_region_Process_received_values_UART :
 		{
-			main_region_Save_values_react(handle,-1);
+			main_region_Process_received_values_UART_react(handle,-1);
 			break;
 		}
-		case Statechart_main_region_Process_data_pc :
+		case Statechart_main_region_Send_data_UART___Process_values_OLED :
 		{
-			main_region_Process_data_pc_react(handle,-1);
+			main_region_Send_data_UART___Process_values_OLED_react(handle,-1);
 			break;
 		}
-		case Statechart_main_region_Process_data_oled :
+		case Statechart_main_region_Send_data_OLED :
 		{
-			main_region_Process_data_oled_react(handle,-1);
+			main_region_Send_data_OLED_react(handle,-1);
+			break;
+		}
+		case Statechart_main_region_Title_screen :
+		{
+			main_region_Title_screen_react(handle,-1);
 			break;
 		}
 		default: 
@@ -282,6 +299,12 @@ void statechart_raise_i2c_callback_sensors(Statechart* handle)
 	run_cycle(handle);
 }
 
+void statechart_raise_user_button(Statechart* handle)
+{
+	statechart_add_event_to_queue(&(handle->in_event_queue), Statechart_user_button);
+	run_cycle(handle);
+}
+
 
 
 
@@ -301,53 +324,65 @@ static void statechart_internal_set_iterration_number(Statechart* handle, sc_int
 static void enact_main_region_Read_sensors(Statechart* handle)
 {
 	/* Entry action for state 'Read_sensors'. */
-	statechart_read_I2C_Sensors(handle);
+	statechart_read_i2c_sensors(handle);
 }
 
-static void enact_main_region_Save_values(Statechart* handle)
+static void enact_main_region_Process_received_values_UART(Statechart* handle)
 {
-	/* Entry action for state 'Save_values'. */
-	statechart_save_i2c_samples(handle,handle->internal.sample_no);
-	statechart_check_min_max_pc(handle);
+	/* Entry action for state 'Process_received_values_UART'. */
+	statechart_process_i2c_samples(handle,handle->internal.sample_no);
 	handle->completed = bool_true;
 }
 
-static void enact_main_region_Process_data_pc(Statechart* handle)
+static void enact_main_region_Send_data_UART___Process_values_OLED(Statechart* handle)
 {
-	/* Entry action for state 'Process_data_pc'. */
-	statechart_check_min_max_oled(handle);
-	statechart_save_data_oled(handle,handle->internal.iterration_number);
+	/* Entry action for state 'Send_data_UART / Process_values_OLED'. */
+	statechart_process_data_oled(handle,handle->internal.iterration_number);
 	statechart_send_data_uart(handle);
 	handle->internal.iterration_number++;
 	handle->completed = bool_true;
 }
 
-static void enact_main_region_Process_data_oled(Statechart* handle)
+static void enact_main_region_Send_data_OLED(Statechart* handle)
 {
-	/* Entry action for state 'Process_data_oled'. */
+	/* Entry action for state 'Send_data_OLED'. */
 	statechart_send_data_oled(handle);
 	handle->completed = bool_true;
 }
 
-/* Exit action for state 'Save_values'. */
-static void exact_main_region_Save_values(Statechart* handle)
+/* Entry action for state 'Title_screen'. */
+static void enact_main_region_Title_screen(Statechart* handle)
 {
-	/* Exit action for state 'Save_values'. */
+	/* Entry action for state 'Title_screen'. */
+	statechart_display_welcome_page(handle);
+}
+
+/* Exit action for state 'Process_received_values_UART'. */
+static void exact_main_region_Process_received_values_UART(Statechart* handle)
+{
+	/* Exit action for state 'Process_received_values_UART'. */
 	handle->internal.sample_no++;
 }
 
-/* Exit action for state 'Process_data_pc'. */
-static void exact_main_region_Process_data_pc(Statechart* handle)
+/* Exit action for state 'Send_data_UART / Process_values_OLED'. */
+static void exact_main_region_Send_data_UART___Process_values_OLED(Statechart* handle)
 {
-	/* Exit action for state 'Process_data_pc'. */
+	/* Exit action for state 'Send_data_UART / Process_values_OLED'. */
 	statechart_internal_set_sample_no(handle, 0);
 }
 
-/* Exit action for state 'Process_data_oled'. */
-static void exact_main_region_Process_data_oled(Statechart* handle)
+/* Exit action for state 'Send_data_OLED'. */
+static void exact_main_region_Send_data_OLED(Statechart* handle)
 {
-	/* Exit action for state 'Process_data_oled'. */
+	/* Exit action for state 'Send_data_OLED'. */
 	statechart_internal_set_iterration_number(handle, 0);
+}
+
+/* Exit action for state 'Title_screen'. */
+static void exact_main_region_Title_screen(Statechart* handle)
+{
+	/* Exit action for state 'Title_screen'. */
+	statechart_start_program(handle);
 }
 
 /* 'default' enter sequence for state Wait_for_timer */
@@ -365,28 +400,36 @@ static void enseq_main_region_Read_sensors_default(Statechart* handle)
 	handle->stateConfVector[0] = Statechart_main_region_Read_sensors;
 }
 
-/* 'default' enter sequence for state Save_values */
-static void enseq_main_region_Save_values_default(Statechart* handle)
+/* 'default' enter sequence for state Process_received_values_UART */
+static void enseq_main_region_Process_received_values_UART_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state Save_values */
-	enact_main_region_Save_values(handle);
-	handle->stateConfVector[0] = Statechart_main_region_Save_values;
+	/* 'default' enter sequence for state Process_received_values_UART */
+	enact_main_region_Process_received_values_UART(handle);
+	handle->stateConfVector[0] = Statechart_main_region_Process_received_values_UART;
 }
 
-/* 'default' enter sequence for state Process_data_pc */
-static void enseq_main_region_Process_data_pc_default(Statechart* handle)
+/* 'default' enter sequence for state Send_data_UART / Process_values_OLED */
+static void enseq_main_region_Send_data_UART___Process_values_OLED_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state Process_data_pc */
-	enact_main_region_Process_data_pc(handle);
-	handle->stateConfVector[0] = Statechart_main_region_Process_data_pc;
+	/* 'default' enter sequence for state Send_data_UART / Process_values_OLED */
+	enact_main_region_Send_data_UART___Process_values_OLED(handle);
+	handle->stateConfVector[0] = Statechart_main_region_Send_data_UART___Process_values_OLED;
 }
 
-/* 'default' enter sequence for state Process_data_oled */
-static void enseq_main_region_Process_data_oled_default(Statechart* handle)
+/* 'default' enter sequence for state Send_data_OLED */
+static void enseq_main_region_Send_data_OLED_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state Process_data_oled */
-	enact_main_region_Process_data_oled(handle);
-	handle->stateConfVector[0] = Statechart_main_region_Process_data_oled;
+	/* 'default' enter sequence for state Send_data_OLED */
+	enact_main_region_Send_data_OLED(handle);
+	handle->stateConfVector[0] = Statechart_main_region_Send_data_OLED;
+}
+
+/* 'default' enter sequence for state Title_screen */
+static void enseq_main_region_Title_screen_default(Statechart* handle)
+{
+	/* 'default' enter sequence for state Title_screen */
+	enact_main_region_Title_screen(handle);
+	handle->stateConfVector[0] = Statechart_main_region_Title_screen;
 }
 
 /* 'default' enter sequence for region main region */
@@ -410,28 +453,36 @@ static void exseq_main_region_Read_sensors(Statechart* handle)
 	handle->stateConfVector[0] = Statechart_last_state;
 }
 
-/* Default exit sequence for state Save_values */
-static void exseq_main_region_Save_values(Statechart* handle)
+/* Default exit sequence for state Process_received_values_UART */
+static void exseq_main_region_Process_received_values_UART(Statechart* handle)
 {
-	/* Default exit sequence for state Save_values */
+	/* Default exit sequence for state Process_received_values_UART */
 	handle->stateConfVector[0] = Statechart_last_state;
-	exact_main_region_Save_values(handle);
+	exact_main_region_Process_received_values_UART(handle);
 }
 
-/* Default exit sequence for state Process_data_pc */
-static void exseq_main_region_Process_data_pc(Statechart* handle)
+/* Default exit sequence for state Send_data_UART / Process_values_OLED */
+static void exseq_main_region_Send_data_UART___Process_values_OLED(Statechart* handle)
 {
-	/* Default exit sequence for state Process_data_pc */
+	/* Default exit sequence for state Send_data_UART / Process_values_OLED */
 	handle->stateConfVector[0] = Statechart_last_state;
-	exact_main_region_Process_data_pc(handle);
+	exact_main_region_Send_data_UART___Process_values_OLED(handle);
 }
 
-/* Default exit sequence for state Process_data_oled */
-static void exseq_main_region_Process_data_oled(Statechart* handle)
+/* Default exit sequence for state Send_data_OLED */
+static void exseq_main_region_Send_data_OLED(Statechart* handle)
 {
-	/* Default exit sequence for state Process_data_oled */
+	/* Default exit sequence for state Send_data_OLED */
 	handle->stateConfVector[0] = Statechart_last_state;
-	exact_main_region_Process_data_oled(handle);
+	exact_main_region_Send_data_OLED(handle);
+}
+
+/* Default exit sequence for state Title_screen */
+static void exseq_main_region_Title_screen(Statechart* handle)
+{
+	/* Default exit sequence for state Title_screen */
+	handle->stateConfVector[0] = Statechart_last_state;
+	exact_main_region_Title_screen(handle);
 }
 
 /* Default exit sequence for region main region */
@@ -451,19 +502,24 @@ static void exseq_main_region(Statechart* handle)
 			exseq_main_region_Read_sensors(handle);
 			break;
 		}
-		case Statechart_main_region_Save_values :
+		case Statechart_main_region_Process_received_values_UART :
 		{
-			exseq_main_region_Save_values(handle);
+			exseq_main_region_Process_received_values_UART(handle);
 			break;
 		}
-		case Statechart_main_region_Process_data_pc :
+		case Statechart_main_region_Send_data_UART___Process_values_OLED :
 		{
-			exseq_main_region_Process_data_pc(handle);
+			exseq_main_region_Send_data_UART___Process_values_OLED(handle);
 			break;
 		}
-		case Statechart_main_region_Process_data_oled :
+		case Statechart_main_region_Send_data_OLED :
 		{
-			exseq_main_region_Process_data_oled(handle);
+			exseq_main_region_Send_data_OLED(handle);
+			break;
+		}
+		case Statechart_main_region_Title_screen :
+		{
+			exseq_main_region_Title_screen(handle);
 			break;
 		}
 		default: 
@@ -476,7 +532,7 @@ static void exseq_main_region(Statechart* handle)
 static void react_main_region__entry_Default(Statechart* handle)
 {
 	/* Default react sequence for initial entry  */
-	enseq_main_region_Wait_for_timer_default(handle);
+	enseq_main_region_Title_screen_default(handle);
 }
 
 
@@ -515,7 +571,7 @@ static sc_integer main_region_Read_sensors_react(Statechart* handle, const sc_in
 			if (handle->iface.i2c_callback_sensors_raised == bool_true)
 			{ 
 				exseq_main_region_Read_sensors(handle);
-				enseq_main_region_Save_values_default(handle);
+				enseq_main_region_Process_received_values_UART_default(handle);
 				transitioned_after = 0;
 			} 
 		} 
@@ -528,22 +584,29 @@ static sc_integer main_region_Read_sensors_react(Statechart* handle, const sc_in
 	} return transitioned_after;
 }
 
-static sc_integer main_region_Save_values_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_region_Process_received_values_UART_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state Save_values. */
+	/* The reactions of state Process_received_values_UART. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_true)
 	{ 
-		/* Default exit sequence for state Save_values */
+		/* Default exit sequence for state Process_received_values_UART */
 		handle->stateConfVector[0] = Statechart_last_state;
-		exact_main_region_Save_values(handle);
+		exact_main_region_Process_received_values_UART(handle);
 		/* The reactions of state null. */
 		if ((handle->internal.sample_no) == (4))
 		{ 
-			enseq_main_region_Process_data_pc_default(handle);
+			enseq_main_region_Send_data_UART___Process_values_OLED_default(handle);
 		}  else
 		{
-			enseq_main_region_Wait_for_timer_default(handle);
+			if ((((handle->internal.iterration_number) == (9)) == bool_true) && (((handle->internal.sample_no) == (3)) == bool_true))
+			{ 
+				statechart_prepare_oled_screen(handle);
+				enseq_main_region_Wait_for_timer_default(handle);
+			}  else
+			{
+				enseq_main_region_Wait_for_timer_default(handle);
+			}
 		}
 	}  else
 	{
@@ -553,22 +616,21 @@ static sc_integer main_region_Save_values_react(Statechart* handle, const sc_int
 	return transitioned_after;
 }
 
-static sc_integer main_region_Process_data_pc_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_region_Send_data_UART___Process_values_OLED_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state Process_data_pc. */
+	/* The reactions of state Send_data_UART / Process_values_OLED. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_true)
 	{ 
-		/* Default exit sequence for state Process_data_pc */
+		/* Default exit sequence for state Send_data_UART / Process_values_OLED */
 		handle->stateConfVector[0] = Statechart_last_state;
-		exact_main_region_Process_data_pc(handle);
+		exact_main_region_Send_data_UART___Process_values_OLED(handle);
 		/* The reactions of state null. */
 		if ((handle->internal.iterration_number) == (10))
 		{ 
-			enseq_main_region_Process_data_oled_default(handle);
+			enseq_main_region_Send_data_OLED_default(handle);
 		}  else
 		{
-			statechart_zero_pc_data(handle);
 			enseq_main_region_Wait_for_timer_default(handle);
 		}
 	}  else
@@ -579,16 +641,15 @@ static sc_integer main_region_Process_data_pc_react(Statechart* handle, const sc
 	return transitioned_after;
 }
 
-static sc_integer main_region_Process_data_oled_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_region_Send_data_OLED_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state Process_data_oled. */
+	/* The reactions of state Send_data_OLED. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_true)
 	{ 
-		/* Default exit sequence for state Process_data_oled */
+		/* Default exit sequence for state Send_data_OLED */
 		handle->stateConfVector[0] = Statechart_last_state;
-		exact_main_region_Process_data_oled(handle);
-		statechart_zero_oled_data(handle);
+		exact_main_region_Send_data_OLED(handle);
 		/* 'default' enter sequence for state Wait_for_timer */
 		handle->stateConfVector[0] = Statechart_main_region_Wait_for_timer;
 	}  else
@@ -597,6 +658,30 @@ static sc_integer main_region_Process_data_oled_react(Statechart* handle, const 
 		transitioned_after = transitioned_before;
 	}
 	return transitioned_after;
+}
+
+static sc_integer main_region_Title_screen_react(Statechart* handle, const sc_integer transitioned_before)
+{
+	/* The reactions of state Title_screen. */
+ 			sc_integer transitioned_after = transitioned_before;
+	if (handle->doCompletion == bool_false)
+	{ 
+		if ((transitioned_after) < (0))
+		{ 
+			if (handle->iface.user_button_raised == bool_true)
+			{ 
+				exseq_main_region_Title_screen(handle);
+				enseq_main_region_Wait_for_timer_default(handle);
+				transitioned_after = 0;
+			} 
+		} 
+		/* If no transition was taken */
+		if ((transitioned_after) == (transitioned_before))
+		{ 
+			/* then execute local reactions. */
+			transitioned_after = transitioned_before;
+		} 
+	} return transitioned_after;
 }
 
 
@@ -676,6 +761,11 @@ static sc_boolean statechart_dispatch_event(Statechart* handle, const statechart
 		case Statechart_i2c_callback_sensors:
 		{
 			handle->iface.i2c_callback_sensors_raised = bool_true;
+			return bool_true;
+		}
+		case Statechart_user_button:
+		{
+			handle->iface.user_button_raised = bool_true;
 			return bool_true;
 		}
 		default:

@@ -102,27 +102,21 @@ static void MX_TIM7_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
- void statechart_read_I2C_Sensors( Statechart* handle){
+ void statechart_read_i2c_sensors( Statechart* handle){
 	 HAL_I2C_Mem_Read_DMA(&hi2c2, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, &Rx_buffer[0], 2);
 	 HAL_I2C_Mem_Read_DMA(&hi2c1, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, &Rx_buffer[2], 2);
  }
- void statechart_check_min_max_pc( Statechart* handle){
 
- }
- void statechart_save_average_data( Statechart* handle){
-
- }
  void statechart_send_data_uart( Statechart* handle){
-	 int len = snprintf(msg, sizeof(msg), "\r\nCh1: %.4f\r\nMin: %.4f\r\nMax: %.4f \r\nCh2: %.4f\r\nMin: %.4f\r\nMax: %.4f\r\nUART counter %d\r\n ", average_sensor[0], uart_min[0], uart_max[0], average_sensor[1], uart_min[1], uart_max[1],uart_counter);
+	 int len = snprintf(msg, sizeof(msg),
+			 "\r\nCh1: %.4f\r\nMin: %.4f\r\nMax: %.4f \r\nCh2: %.4f\r\nMin: %.4f\r\nMax: %.4f\r\nUART counter %d\r\n ",
+			 average_sensor[0], uart_min[0], uart_max[0], average_sensor[1], uart_min[1], uart_max[1],uart_counter);
+
 	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	 sum_sensor[0]=sum_sensor[1]=0;
-
-
-
  }
- void statechart_check_min_max_oled( Statechart* handle){
 
- }
+
  void statechart_send_data_oled( Statechart* handle){
 	 float average_oled[2];
 	 average_oled[0]=sum_sensor_oled[0]/10;
@@ -136,78 +130,81 @@ static void MX_TIM7_Init(void);
 	 char ch2_min[50];
 	 char ch2_max[50];
 
-	 SSD1306_Clear();
-	 sprintf (ch1_value, "%.4f", average_oled[0]);
-	 sprintf (ch1_min, "%.4f", oled_min[0]);
-	 sprintf (ch1_max, "%.4f", oled_max[0]);
+	 sprintf (ch1_value, "%.2f", average_oled[0]);
+	 sprintf (ch1_min, "%.2f", oled_min[0]);
+	 sprintf (ch1_max, "%.2f", oled_max[0]);
 
-	 sprintf (ch2_value, "%.4f", average_oled[1]);
-	 sprintf (ch2_min, "%.4f", oled_min[1]);
-	 sprintf (ch2_max, "%.4f", oled_max[1]);
+	 sprintf (ch2_value, "%.2f", average_oled[1]);
+	 sprintf (ch2_min, "%.2f", oled_min[1]);
+	 sprintf (ch2_max, "%.2f", oled_max[1]);
 
-	 SSD1306_GotoXY (5,0); // goto 0, 0
-	 SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
 	 SSD1306_GotoXY (35,0); // goto 0, 0
 	 SSD1306_Puts (ch1_value, &Font_7x10, 1); // print Ch1:
-	 SSD1306_GotoXY (110,0); // goto 0, 0
-	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
-	 SSD1306_GotoXY (5, 10);
-	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
 	 SSD1306_GotoXY (35, 10);
 	 SSD1306_Puts (ch1_min, &Font_7x10, 1); // print Hello
+
+	 SSD1306_GotoXY (35, 20);
+	 SSD1306_Puts (ch1_max, &Font_7x10, 1); // print Hello
+
+	 SSD1306_GotoXY (35, 33);
+	 SSD1306_Puts (ch2_value, &Font_7x10, 1); // print Hello
+
+	 SSD1306_GotoXY (35, 43);
+	 SSD1306_Puts (ch2_min, &Font_7x10, 1); // print Hello
+
+	 SSD1306_GotoXY (35, 53);
+	 SSD1306_Puts (ch2_max, &Font_7x10, 1); // print Hello
+
+	 /*
+	 SSD1306_GotoXY (5, 10);
+	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
 	 SSD1306_GotoXY (110,10); // goto 0, 0
 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
 	 SSD1306_GotoXY (5, 20);
 	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (35, 20);
-	 SSD1306_Puts (ch1_max, &Font_7x10, 1); // print Hello
 	 SSD1306_GotoXY (110,20); // goto 0, 0
 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
 	 SSD1306_GotoXY (5, 33);
 	 SSD1306_Puts ("Ch2:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (35, 33);
-	 SSD1306_Puts (ch2_value, &Font_7x10, 1); // print Hello
 	 SSD1306_GotoXY (110,33); // goto 0, 0
+	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+
+	 SSD1306_GotoXY (5,0); // goto 0, 0
+	 SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
+	 SSD1306_GotoXY (110,0); // goto 0, 0
 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
 	 SSD1306_GotoXY (5, 43);
 	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (35, 43);
-	 SSD1306_Puts (ch2_min, &Font_7x10, 1); // print Hello
 	 SSD1306_GotoXY (110,43); // goto 0, 0
 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
 	 SSD1306_GotoXY (5, 53);
 	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (35, 53);
-	 SSD1306_Puts (ch2_max, &Font_7x10, 1); // print Hello
 	 SSD1306_GotoXY (110,53); // goto 0, 0
 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
-
+	*/
 	 SSD1306_UpdateScreen();
 
 	 sum_sensor_oled[0]=sum_sensor_oled[1]=0;
-
-	/* uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
+	 /*
+	 uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
 	 int len = snprintf(value, sizeof(value), "\r\nTIMER VALUE: %lu \r\n ", timerValue);
 	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
 	 __HAL_TIM_SET_COUNTER(&htim7, 0);
- 	 */
+	*/
  }
- void statechart_zero_pc_data( Statechart* handle){
 
- }
- void statechart_zero_oled_data( Statechart* handle){
 
- }
- void statechart_save_i2c_samples( Statechart* handle, const sc_integer sample_no){
+ void statechart_process_i2c_samples( Statechart* handle, const sc_integer sample_no){
 	 for (int i= 0; i< 2; i++) {
 	     value_raw[i] = Rx_buffer[i* 2] | (Rx_buffer[i* 2 + 1] << 8);
-	     normal_value[i] = value_raw[i] * 0.1344f;
+	     normal_value[i] = value_raw[i] * 1.0752;
 	     sum_sensor[i] = sum_sensor[i] + normal_value[i];
 	     sensor_readings[i][sample_no] = normal_value[i];
 
@@ -222,10 +219,10 @@ static void MX_TIM7_Init(void);
 	 /*
 	 uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
 		 int len = snprintf(value, sizeof(value), "\r\nTIMER VALUE: %lu \r\n ", timerValue);
-		 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
- 	 	 */
+		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
+	*/
  }
- void statechart_save_data_oled( Statechart* handle, const sc_integer iterration_number){
+ void statechart_process_data_oled( Statechart* handle, const sc_integer iterration_number){
 	 for (int i= 0; i< 2; i++) {
 	     average_sensor[i] = sum_sensor[i] / SAMPLE_NUMBER;
 	     sum_sensor_oled[i] = sum_sensor_oled[i] + average_sensor[i];
@@ -240,6 +237,100 @@ static void MX_TIM7_Init(void);
 	         oled_max[i] = uart_max[i];
 	     }
 	 }
+ }
+ void statechart_prepare_oled_screen( Statechart* handle){
+	 	 /*SSD1306_GotoXY (5, 10);
+	 	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
+	 	 SSD1306_GotoXY (110,10); // goto 0, 0
+	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	 	 SSD1306_GotoXY (5, 20);
+	 	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
+	 	 SSD1306_GotoXY (110,20); // goto 0, 0
+	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	 	 SSD1306_GotoXY (5, 33);
+	 	 SSD1306_Puts ("Ch2:", &Font_7x10, 1); // print Hello
+	 	 SSD1306_GotoXY (110,33); // goto 0, 0
+	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+
+	 	 SSD1306_GotoXY (5,0); // goto 0, 0
+	 	 SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
+	 	 SSD1306_GotoXY (110,0); // goto 0, 0
+	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	 	 SSD1306_GotoXY (5, 43);
+	 	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
+	 	 SSD1306_GotoXY (110,43); // goto 0, 0
+	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	 	 SSD1306_GotoXY (5, 53);
+	 	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
+	 	 SSD1306_GotoXY (110,53); // goto 0, 0
+	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+	*/
+
+
+	 SSD1306_DrawFilledRectangle(35, 0, 75, 63, 0);
+	 SSD1306_UpdateScreen();
+ }
+
+
+ void statechart_display_welcome_page( Statechart* handle){
+	SSD1306_GotoXY (0, 5);
+	SSD1306_Puts ("Semestro projektas", &Font_7x10, 1); // print Hello
+
+	SSD1306_GotoXY (3,15); // goto 0, 0
+	SSD1306_Puts ("Sviesos matuoklis", &Font_7x10, 1); // print lx
+
+	SSD1306_GotoXY (20, 30);
+	SSD1306_Puts ("Konstantinas", &Font_7x10, 1); // print Hello
+
+	SSD1306_GotoXY (40, 40);
+	SSD1306_Puts ("Rimkus", &Font_7x10, 1); // print Hello
+
+	SSD1306_GotoXY (37, 50);
+	SSD1306_Puts ("EEI-3/1", &Font_7x10, 1); // print Hello
+
+
+	SSD1306_UpdateScreen(); // update screen
+ }
+
+ void statechart_start_program( Statechart* handle){
+	SSD1306_Clear();
+	SSD1306_GotoXY (5,0); // goto 0, 0
+	SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
+	SSD1306_GotoXY (110,0); // goto 0, 0
+	SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	SSD1306_GotoXY (5, 10);
+	SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
+	SSD1306_GotoXY (110,10); // goto 0, 0
+	SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	SSD1306_GotoXY (5, 20);
+	SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
+	SSD1306_GotoXY (110,20); // goto 0, 0
+	SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	SSD1306_GotoXY (5, 33);
+	SSD1306_Puts ("Ch2:", &Font_7x10, 1); // print Hello
+	SSD1306_GotoXY (110,33); // goto 0, 0
+	SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	SSD1306_GotoXY (5, 43);
+	SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
+	SSD1306_GotoXY (110,43); // goto 0, 0
+	SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	SSD1306_GotoXY (5, 53);
+	SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
+	SSD1306_GotoXY (110,53); // goto 0, 0
+	SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
+
+	SSD1306_UpdateScreen(); // update screen
+	HAL_TIM_Base_Start_IT(&htim6);
  }
 /* USER CODE END 0 */
 
@@ -279,10 +370,11 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start_IT(&htim6);
+
   HAL_TIM_Base_Start_IT(&htim7);
   SSD1306_Init (); // initialise the display
 
+  /*
   SSD1306_GotoXY (5,0); // goto 0, 0
   SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
   SSD1306_GotoXY (110,0); // goto 0, 0
@@ -314,9 +406,9 @@ int main(void)
   SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
   SSD1306_UpdateScreen(); // update screen
+	*/
 
-
-  uint16_t config = VEML7700_GAIN_2 | VEML7700_IT_25MS;
+  uint16_t config = VEML7700_GAIN_1_4 | VEML7700_IT_25MS;
   HAL_I2C_Mem_Write(&hi2c2, VEML7700_ADDR, VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&config, 2, 10);
   HAL_I2C_Mem_Write(&hi2c1, VEML7700_ADDR, VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&config, 2, 10);
 
@@ -649,6 +741,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
@@ -672,6 +768,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM6) {
     	uart_counter++;
     	statechart_raise_timer_interrupt(&sc_handle);
+    }
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == B1_Pin) {
+    	statechart_raise_user_button(&sc_handle);
     }
 }
 /* USER CODE END 4 */
