@@ -36,8 +36,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
-
+#define DEBOUNCE_MS 50
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -62,6 +61,8 @@ DMA_HandleTypeDef hdma_usart2_tx;
 //Flags for I2C DMA callback
 volatile uint8_t i2c1_done=0;
 volatile uint8_t i2c2_done=0;
+//For button debounce
+volatile uint32_t last_button_time = 0;
 
 static uint8_t  Rx_buffer[4];          // 2 bytes per channel
 static uint16_t value_raw[2];
@@ -836,7 +837,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == B1_Pin) {
-    	statechart_raise_user_button(&sc_handle);
+		uint32_t now = HAL_GetTick(); //
+
+		if (now - last_button_time > DEBOUNCE_MS) {
+			last_button_time = now;
+
+			statechart_raise_user_button(&sc_handle);
+		}
     }
 }
 /* USER CODE END 4 */

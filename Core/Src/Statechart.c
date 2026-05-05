@@ -24,7 +24,6 @@ static void enact_main_orth_r2_normal_mode(Statechart* handle);
 static void enact_main_orth_r2_high_speed_mode(Statechart* handle);
 static void enact_main_orth_r2_low_light_mode(Statechart* handle);
 static void enact_main_welcome(Statechart* handle);
-static void exact_main_orth_r1_screen(Statechart* handle);
 static void exact_main_orth_r1_Process_I2C(Statechart* handle);
 static void exact_main_orth_r1_Send_uart(Statechart* handle);
 static void exact_main_orth_r2_normal_mode(Statechart* handle);
@@ -100,6 +99,8 @@ static void run_cycle(Statechart* handle);
 
 
 
+static void statechart_internal_set_transition_flag(Statechart* handle, sc_integer value)
+;
 static void statechart_internal_set_sample_no(Statechart* handle, sc_integer value)
 ;
 static void statechart_internal_set_iterration_number(Statechart* handle, sc_integer value)
@@ -137,9 +138,9 @@ void statechart_init(Statechart* handle)
 	
 	
 	/* Default init sequence for statechart Statechart */
-	statechart_set_auto_gain(handle, 0);
 	statechart_set_required_sample_no(handle, 5);
 	statechart_set_mode_type(handle, 0);
+	statechart_internal_set_transition_flag(handle, 0);
 	statechart_internal_set_sample_no(handle, 0);
 	statechart_internal_set_iterration_number(handle, 0);
 	statechart_internal_set_timer_required(handle, 5);
@@ -403,14 +404,6 @@ void statechart_raise_user_button(Statechart* handle)
 
 
 
-sc_integer statechart_get_auto_gain(const Statechart* handle)
-{
-	return handle->iface.auto_gain;
-}
-void statechart_set_auto_gain(Statechart* handle, sc_integer value)
-{
-	handle->iface.auto_gain = value;
-}
 sc_integer statechart_get_required_sample_no(const Statechart* handle)
 {
 	return handle->iface.required_sample_no;
@@ -428,6 +421,10 @@ void statechart_set_mode_type(Statechart* handle, sc_integer value)
 	handle->iface.mode_type = value;
 }
 
+static void statechart_internal_set_transition_flag(Statechart* handle, sc_integer value)
+{
+	handle->internal.transition_flag = value;
+}
 static void statechart_internal_set_sample_no(Statechart* handle, sc_integer value)
 {
 	handle->internal.sample_no = value;
@@ -459,6 +456,7 @@ static void enact_main_orth_r1_screen(Statechart* handle)
 	statechart_display_mode_type(handle,handle->iface.mode_type);
 	statechart_change_timer_and_sensor(handle,handle->iface.mode_type);
 	statechart_zero_data(handle);
+	statechart_internal_set_transition_flag(handle, 1);
 }
 
 /* Entry action for state 'Read I2C'. */
@@ -496,7 +494,6 @@ static void enact_main_orth_r2_normal_mode(Statechart* handle)
 	/* Entry action for state 'normal_mode'. */
 	statechart_internal_set_timer_required(handle, 100);
 	statechart_set_required_sample_no(handle, 5);
-	statechart_set_auto_gain(handle, 1);
 }
 
 /* Entry action for state 'high_speed_mode'. */
@@ -506,7 +503,6 @@ static void enact_main_orth_r2_high_speed_mode(Statechart* handle)
 	statechart_set_mode_type(handle, 1);
 	statechart_internal_set_timer_required(handle, 160);
 	statechart_set_required_sample_no(handle, 8);
-	statechart_set_auto_gain(handle, 0);
 }
 
 /* Entry action for state 'low_light_mode'. */
@@ -523,13 +519,6 @@ static void enact_main_welcome(Statechart* handle)
 {
 	/* Entry action for state 'welcome'. */
 	statechart_display_welcome_page(handle);
-}
-
-/* Exit action for state 'screen'. */
-static void exact_main_orth_r1_screen(Statechart* handle)
-{
-	/* Exit action for state 'screen'. */
-	statechart_start_program(handle);
 }
 
 /* Exit action for state 'Process I2C'. */
@@ -672,7 +661,6 @@ static void exseq_main_orth_r1_screen(Statechart* handle)
 	/* Default exit sequence for state screen */
 	handle->stateConfVector[0] = Statechart_main_orth;
 	handle->stateConfVectorPosition = 0;
-	exact_main_orth_r1_screen(handle);
 }
 
 /* Default exit sequence for state Wait for timer */
@@ -877,9 +865,19 @@ static sc_integer main_orth_r1_screen_react(Statechart* handle, const sc_integer
 			{ 
 				exseq_main_orth_r1_screen(handle);
 				statechart_internal_set_timer_counter(handle, 0);
+				statechart_start_program(handle);
 				enseq_main_orth_r1_Wait_for_timer_default(handle);
 				transitioned_after = 0;
-			} 
+			}  else
+			{
+				if ((handle->internal.mode_transition) == (1))
+				{ 
+					exseq_main_orth_r1_screen(handle);
+					statechart_internal_set_mode_transition(handle, 0);
+					enseq_main_orth_r1_screen_default(handle);
+					transitioned_after = 0;
+				} 
+			}
 		} 
 		/* If no transition was taken */
 		if ((transitioned_after) == (transitioned_before))
@@ -1006,9 +1004,10 @@ static sc_integer main_orth_r2_normal_mode_react(Statechart* handle, const sc_in
 	{ 
 		if ((transitioned_after) < (1))
 		{ 
-			if (handle->iface.user_button_raised == bool_true)
+			if (((handle->iface.user_button_raised) == bool_true) && (((handle->internal.transition_flag) == (1)) == bool_true))
 			{ 
 				exseq_main_orth_r2_normal_mode(handle);
+				statechart_internal_set_transition_flag(handle, 0);
 				enseq_main_orth_r2_high_speed_mode_default(handle);
 				main_orth_react(handle,0);
 				transitioned_after = 1;
@@ -1031,9 +1030,10 @@ static sc_integer main_orth_r2_high_speed_mode_react(Statechart* handle, const s
 	{ 
 		if ((transitioned_after) < (1))
 		{ 
-			if (handle->iface.user_button_raised == bool_true)
+			if (((handle->iface.user_button_raised) == bool_true) && (((handle->internal.transition_flag) == (1)) == bool_true))
 			{ 
 				exseq_main_orth_r2_high_speed_mode(handle);
+				statechart_internal_set_transition_flag(handle, 0);
 				enseq_main_orth_r2_low_light_mode_default(handle);
 				main_orth_react(handle,0);
 				transitioned_after = 1;
@@ -1056,9 +1056,10 @@ static sc_integer main_orth_r2_low_light_mode_react(Statechart* handle, const sc
 	{ 
 		if ((transitioned_after) < (1))
 		{ 
-			if (handle->iface.user_button_raised == bool_true)
+			if (((handle->iface.user_button_raised) == bool_true) && (((handle->internal.transition_flag) == (1)) == bool_true))
 			{ 
 				exseq_main_orth_r2_low_light_mode(handle);
+				statechart_internal_set_transition_flag(handle, 0);
 				enseq_main_orth_r2_normal_mode_default(handle);
 				main_orth_react(handle,0);
 				transitioned_after = 1;

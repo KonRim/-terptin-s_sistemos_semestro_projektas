@@ -117,7 +117,6 @@ struct StatechartIface
 	sc_boolean timer_interrupt_raised;
 	sc_boolean i2c_callback_sensors_raised;
 	sc_boolean user_button_raised;
-	sc_integer auto_gain;
 	sc_integer required_sample_no;
 	sc_integer mode_type;
 };
@@ -127,6 +126,7 @@ struct StatechartIface
 /*! Type declaration of the data structure for the StatechartInternal interface scope. */
 struct StatechartInternal
 {
+	sc_integer transition_flag;
 	sc_integer sample_no;
 	sc_integer iterration_number;
 	sc_integer timer_required;
@@ -181,10 +181,6 @@ extern void statechart_raise_timer_interrupt(Statechart* handle);
 extern void statechart_raise_i2c_callback_sensors(Statechart* handle);
 /*! Raises the in event 'user_button' that is defined in the default interface scope. */ 
 extern void statechart_raise_user_button(Statechart* handle);
-/*! Gets the value of the variable 'auto_gain' that is defined in the default interface scope. */ 
-extern sc_integer statechart_get_auto_gain(const Statechart* handle);
-/*! Sets the value of the variable 'auto_gain' that is defined in the default interface scope. */ 
-extern void statechart_set_auto_gain(Statechart* handle, sc_integer value);
 /*! Gets the value of the variable 'required_sample_no' that is defined in the default interface scope. */ 
 extern sc_integer statechart_get_required_sample_no(const Statechart* handle);
 /*! Sets the value of the variable 'required_sample_no' that is defined in the default interface scope. */ 
