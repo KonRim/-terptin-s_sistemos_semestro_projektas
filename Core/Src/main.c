@@ -36,10 +36,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define UART_TIMEOUT 1000
-#define SAMPLE_NUMBER  4
-#define COUNTS_LOW  100
-#define COUNTS_HIGH 10000
 
 
 #define VEML7700_COEF_A  6.0135e-13f
@@ -74,14 +70,10 @@ uint8_t  Rx_buffer[4];          // 2 bytes per channel
 uint16_t value_raw[2];
 float    normal_value[2];
 float    sum_sensor[2];
-//float    sensor_readings[2][NUM_SAMPLES];
 float    uart_min[2];
 float    uart_max[2];
 int uart_counter=0;
-int auto_mode_active=1;
-float sensor_readings[2][SAMPLE_NUMBER];
-uint8_t dma_ready =0;
-uint8_t read_sensor = 0;
+
 
 static I2C_HandleTypeDef *hi2c_ch[2] = {&hi2c1, &hi2c2};
 
@@ -95,11 +87,21 @@ char value[200];
 static uint8_t current_gain_step[2] = {1, 1};  // one per channel
 
 static const uint16_t gain_steps[] = {
-    VEML7700_GAIN_1_8,   // 0 — lowest sensitivity
-    VEML7700_GAIN_1_4,   // 1
-    VEML7700_GAIN_1,     // 2
-    VEML7700_GAIN_2      // 3 — highest sensitivity
+	VEML7700_GAIN_1_8,   // 0 — lowest sensitivity
+	VEML7700_GAIN_1_4,   // 1
+	VEML7700_GAIN_1,     // 2
+	VEML7700_GAIN_2
+		 // 1
 };
+
+
+static const uint16_t it_time[] = {
+	VEML7700_IT_25MS,   // 0 — lowest sensitivity
+	VEML7700_IT_100MS,       // 3 — highest sensitivity
+};
+
+
+
 
 static const float lux_resolution[] = {
     2.1504f,   // step 0 — GAIN 1/8x
@@ -132,7 +134,7 @@ static void MX_TIM7_Init(void);
 /* USER CODE BEGIN 0 */
 
 
-void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
+void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain, uint16_t integration_time) {
     uint8_t conf_buf[2];
     uint16_t conf;
 
@@ -145,7 +147,7 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
                       conf_buf, 2, HAL_MAX_DELAY);
 
     // step 2 — write new gain with sensor active (ALS_SD = 0)
-    conf = gain | VEML7700_ALS_SD_ON |VEML7700_IT_25MS;
+    conf = gain | VEML7700_ALS_SD_ON |integration_time;
     conf_buf[0] = conf & 0xFF;
     conf_buf[1] = (conf >> 8) & 0xFF;
     HAL_I2C_Mem_Write(hi2c, VEML7700_ADDR,
@@ -154,20 +156,20 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 }
 
 
-
-
-
-
  void statechart_read_i2c_sensors( Statechart* handle){
 	 HAL_I2C_Mem_Read_DMA(&hi2c1, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, &Rx_buffer[0], 2);
 	 HAL_I2C_Mem_Read_DMA(&hi2c2, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, &Rx_buffer[2], 2);
  }
 
  void statechart_send_data_uart( Statechart* handle){
+	 /*
 	 int len = snprintf(msg, sizeof(msg),
 			 "\r\nCh1: %.4f\r\nMin: %.4f\r\nMax: %.4f \r\nCh2: %.4f\r\nMin: %.4f\r\nMax: %.4f\r\n Gain1 %d\r\n Gain2 %d\r\n UART counter: %d\r\n",
 			 average_sensor[0], uart_min[0], uart_max[0], average_sensor[1], uart_min[1], uart_max[1], current_gain_step[0], current_gain_step[1], uart_counter);
-
+	 */
+	 int len = snprintf(msg, sizeof(msg),
+	 			 "\r\nCh1: %.4f\r\nMin: %.4f\r\nMax: %.4f \r\nCh2: %.4f\r\nMin: %.4f\r\nMax: %.4f\r\n",
+	 			 average_sensor[0], uart_min[0], uart_max[0], average_sensor[1], uart_min[1], uart_max[1]);
 	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	 sum_sensor[0]=sum_sensor[1]=0;
  }
@@ -175,113 +177,77 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 
  void statechart_send_data_oled( Statechart* handle){
 	 float average_oled[2];
-	 average_oled[0]=sum_sensor_oled[0]/10;
-	 average_oled[1]=sum_sensor_oled[1]/10;
-	 char ch1_value[50];
-	 char ch1_min[50];
-	 char ch1_max[50];
+	 char ch_value[2][50];
+	 char ch_min[2][50];
+	 char ch_max[2][50];
+	 int precision[2];
 
+	 for (int i=0; i<2; i++){
+		 average_oled[i]=sum_sensor_oled[i]/10.0f;
+		 switch (current_gain_step[i]) {
+		 	 	 default:
+		 	 	 case 0:
+		 	 	 	 precision[i]=0;
+		 	 		 break;
 
-	 char ch2_value[50];
-	 char ch2_min[50];
-	 char ch2_max[50];
+		 	 	case 1:
+					 precision[i]=2;
+					 break;
 
-	 sprintf (ch1_value, "%.2f", average_oled[0]);
-	 sprintf (ch1_min, "%.2f", oled_min[0]);
-	 sprintf (ch1_max, "%.2f", oled_max[0]);
+		 	 	 case 2:
+					 precision[i]=3;
+					 break;
 
-	 sprintf (ch2_value, "%.2f", average_oled[1]);
-	 sprintf (ch2_min, "%.2f", oled_min[1]);
-	 sprintf (ch2_max, "%.2f", oled_max[1]);
+				case 3:
+					 precision[i]=4;
+					 break;
+		 }
 
-	 SSD1306_GotoXY (35,0); // goto 0, 0
-	 SSD1306_Puts (ch1_value, &Font_7x10, 1); // print Ch1:
+		 sprintf(ch_value[i], "%.*f", precision[i], average_oled[i]);
+		 sprintf(ch_min[i],   "%.*f", precision[i], oled_min[i]);
+		 sprintf(ch_max[i],   "%.*f", precision[i], oled_max[i]);
 
-	 SSD1306_GotoXY (35, 10);
-	 SSD1306_Puts (ch1_min, &Font_7x10, 1); // print Hello
+		 SSD1306_GotoXY (35,0+33*i); // goto 0, 0
+		 SSD1306_Puts (ch_value[i], &Font_7x10, 1); // print Ch1:
 
-	 SSD1306_GotoXY (35, 20);
-	 SSD1306_Puts (ch1_max, &Font_7x10, 1); // print Hello
+		 SSD1306_GotoXY (35, 10+33*i);
+		 SSD1306_Puts (ch_min[i], &Font_7x10, 1); // print Hello
 
-	 SSD1306_GotoXY (35, 33);
-	 SSD1306_Puts (ch2_value, &Font_7x10, 1); // print Hello
+		 SSD1306_GotoXY (35, 20+33*i);
+		 SSD1306_Puts (ch_max[i], &Font_7x10, 1); // print Hello
+		 sum_sensor_oled[i]=0;
+	 }
 
-	 SSD1306_GotoXY (35, 43);
-	 SSD1306_Puts (ch2_min, &Font_7x10, 1); // print Hello
-
-	 SSD1306_GotoXY (35, 53);
-	 SSD1306_Puts (ch2_max, &Font_7x10, 1); // print Hello
-
-	 /*
-	 SSD1306_GotoXY (5, 10);
-	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (110,10); // goto 0, 0
-	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	 SSD1306_GotoXY (5, 20);
-	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (110,20); // goto 0, 0
-	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	 SSD1306_GotoXY (5, 33);
-	 SSD1306_Puts ("Ch2:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (110,33); // goto 0, 0
-	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-
-	 SSD1306_GotoXY (5,0); // goto 0, 0
-	 SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
-	 SSD1306_GotoXY (110,0); // goto 0, 0
-	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	 SSD1306_GotoXY (5, 43);
-	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (110,43); // goto 0, 0
-	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	 SSD1306_GotoXY (5, 53);
-	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
-	 SSD1306_GotoXY (110,53); // goto 0, 0
-	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	*/
 	 SSD1306_UpdateScreen();
-
-	 sum_sensor_oled[0]=sum_sensor_oled[1]=0;
 	 HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0);
-
 
 	 //uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
 	 /*
-	 int len = snprintf(value, sizeof(value), "\r\nuart VALUE: %d \r\n ", uart_counter);
-	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
+	 int len = snprintf(msg, sizeof(msg), "\r\nuart VALUE: %d \r\n ", uart_counter);
+	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	 __HAL_TIM_SET_COUNTER(&htim7, 0);
 	*/
  }
 
 
- void statechart_process_i2c_samples( Statechart* handle, const sc_integer sample_no){
+ void statechart_process_i2c_samples( Statechart* handle, const sc_integer sample_no, const sc_integer mode_type){
 	 for (int i= 0; i< 2; i++) {
 	     value_raw[i] = Rx_buffer[i* 2] | (Rx_buffer[i* 2 + 1] << 8);
-
-
-
-
-
-
-
-	     normal_value[i] = value_raw[i] *  lux_resolution[current_gain_step[i]];
+	     if(mode_type==2){
+	    	 normal_value[i] = value_raw[i] * 0.0336f;
+	     }
+	     else {
+	    	 normal_value[i] = value_raw[i] *  lux_resolution[current_gain_step[i]];
+	     }
 	     if(normal_value[i]>1000.0){
 	    	 float x = normal_value[i];
 	    	 normal_value[i] = (VEML7700_COEF_A * x*x*x*x)
 	    	                  + (VEML7700_COEF_B * x*x*x)
 	    	                  + (VEML7700_COEF_C * x*x)
 	    	                  + (VEML7700_COEF_D * x);
-
-
 	    	 HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 	     }
-	     if (auto_mode_active) {
+	     if (mode_type==0) {
 	    	 uint8_t new_step;
 	    	 float lux = normal_value[i];
 	    	     if (lux < 25.0f) {
@@ -297,18 +263,11 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 	    	     // only write to sensor if gain actually needs to change
 	    	     if (new_step != current_gain_step[i]) {
 	    	         current_gain_step[i] = new_step;
-	    	         veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]]);
+	    	         veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
 	    	     }
 	     	}
 
-
-
-
-
 	     sum_sensor[i] = sum_sensor[i] + normal_value[i];
-	     sensor_readings[i][sample_no] = normal_value[i];
-
-
 
 	     if (sample_no == 0) {
 	         uart_min[i] = uart_max[i] = normal_value[i];
@@ -320,33 +279,117 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 	 }
 	 /*
 	 uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
-		 int len = snprintf(value, sizeof(value), "\r\nTIMER VALUE: %lu \r\n ", timerValue);
-		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
+		 int len = snprintf(msg, sizeof(msg), "\r\nTIMER VALUE: %lu \r\n ", timerValue);
+		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	*/
 
 	 /*
-	 int len = snprintf(value, sizeof(value), "\r\nNormal value1: %.4f \r\nNormal value2: %.4f \r\n ", normal_value[0], normal_value[1]);
-	 		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
+	 int len = snprintf(msg, sizeof(msg), "\r\nNormal value1: %.4f \r\nNormal value2: %.4f \r\n ", normal_value[0], normal_value[1]);
+	 		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	*/
  }
   void statechart_display_mode_type( Statechart* handle, const sc_integer mode_type){
+	  SSD1306_Clear();
+	  switch (mode_type) {
+	  	  default:
+	  	  case 0:
+	    	    SSD1306_GotoXY (0, 0);
+			    SSD1306_Puts ("Paprastas rezimas", &Font_7x10, 1); // print Hello
 
+				SSD1306_GotoXY (0,20); // goto 0, 0
+				SSD1306_Puts ("Integravimas: 25ms", &Font_7x10, 1); // print lx
+
+				SSD1306_GotoXY (0, 30);
+				SSD1306_Puts ("Matavimo per: 40ms", &Font_7x10, 1); // print Hello
+
+				SSD1306_GotoXY (0, 40);
+				SSD1306_Puts ("Stiprinimas: kint.", &Font_7x10, 1); // print Hello
+
+				SSD1306_GotoXY (0, 50);
+				SSD1306_Puts ("(priklauso nuo lx)", &Font_7x10, 1); // print Hell
+
+				break;
+
+	      case 1:
+	    	    SSD1306_GotoXY (0, 0);
+				SSD1306_Puts ("Velniskas greitis", &Font_7x10, 1); // print Hello
+
+				SSD1306_GotoXY (0,20); // goto 0, 0
+				SSD1306_Puts ("Integravimas: 25ms", &Font_7x10, 1); // print lx
+
+				SSD1306_GotoXY (0, 30);
+				SSD1306_Puts ("Matavimo per.:25ms", &Font_7x10, 1); // print Hello
+
+				SSD1306_GotoXY (0, 40);
+				SSD1306_Puts ("Stiprinimas: 0.25", &Font_7x10, 1); // print Hello
+
+				break;
+
+	      case 2:
+	    	  	SSD1306_GotoXY (0, 0);
+				SSD1306_Puts ("Mazas apsvietimas", &Font_7x10, 1); // print Hello
+
+				SSD1306_GotoXY (0,20); // goto 0, 0
+				SSD1306_Puts ("Integravimas:100ms", &Font_7x10, 1); // print lx
+
+				SSD1306_GotoXY (0, 30);
+				SSD1306_Puts ("Matavimo per:100ms", &Font_7x10, 1); // print Hello
+
+				SSD1306_GotoXY (0, 40);
+				SSD1306_Puts ("Stiprinimas: 2", &Font_7x10, 1); // print Hello
+				break;
+
+	  }
+	  SSD1306_UpdateScreen();
 
   }
 
   void statechart_change_timer_and_sensor( Statechart* handle, const sc_integer mode_type){
-	  HAL_TIM_Base_Start_IT(&htim6);
+	  HAL_TIM_Base_Stop_IT(&htim6);
+
+	    switch (mode_type) {
+	        case 0:
+			default:
+				__HAL_TIM_SET_AUTORELOAD(&htim6, 39);
+				for(int i=0; i<2; i++){
+						current_gain_step[i]=1;
+						veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
+					  }
+				break;
+
+	        case 1:
+	            __HAL_TIM_SET_AUTORELOAD(&htim6, 24);
+	            for(int i=0; i<2; i++){
+						current_gain_step[i]=1;
+						veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
+					  }
+	            break;
+
+	        case 2:
+	            __HAL_TIM_SET_AUTORELOAD(&htim6, 99);
+	            for(int i=0; i<2; i++){
+						current_gain_step[i]=3;
+						veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[1]);
+					  }
+	            break;
+	    }
+
+	    __HAL_TIM_SET_COUNTER(&htim6, 0);
+	    __HAL_TIM_CLEAR_FLAG(&htim6, TIM_FLAG_UPDATE);
+	    TIM6->EGR = TIM_EGR_UG;
+	    HAL_TIM_Base_Start_IT(&htim6);
   }
+
   void statechart_zero_data( Statechart* handle){
-
+	  for(int i=0; i<2; i++){
+		  sum_sensor_oled[i]=sum_sensor[i]=0;
+	  }
   }
 
 
-
-
- void statechart_process_data_oled( Statechart* handle, const sc_integer iterration_number){
+ void statechart_process_data_oled( Statechart* handle, const sc_integer required_sample_no, const sc_integer iterration_number){
 	 for (int i= 0; i< 2; i++) {
-	     average_sensor[i] = sum_sensor[i] / SAMPLE_NUMBER;
+	     average_sensor[i] = sum_sensor[i] / (float)required_sample_no;
 	     sum_sensor_oled[i] = sum_sensor_oled[i] + average_sensor[i];
 
 	     if (iterration_number == 0) {
@@ -360,39 +403,8 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 	     }
 	 }
  }
+
  void statechart_prepare_oled_screen( Statechart* handle){
-	 	 /*SSD1306_GotoXY (5, 10);
-	 	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
-	 	 SSD1306_GotoXY (110,10); // goto 0, 0
-	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	 	 SSD1306_GotoXY (5, 20);
-	 	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
-	 	 SSD1306_GotoXY (110,20); // goto 0, 0
-	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	 	 SSD1306_GotoXY (5, 33);
-	 	 SSD1306_Puts ("Ch2:", &Font_7x10, 1); // print Hello
-	 	 SSD1306_GotoXY (110,33); // goto 0, 0
-	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-
-	 	 SSD1306_GotoXY (5,0); // goto 0, 0
-	 	 SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
-	 	 SSD1306_GotoXY (110,0); // goto 0, 0
-	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	 	 SSD1306_GotoXY (5, 43);
-	 	 SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
-	 	 SSD1306_GotoXY (110,43); // goto 0, 0
-	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-	 	 SSD1306_GotoXY (5, 53);
-	 	 SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
-	 	 SSD1306_GotoXY (110,53); // goto 0, 0
-	 	 SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-	*/
-
 
 	 SSD1306_DrawFilledRectangle(35, 0, 75, 63, 0);
 	 SSD1306_UpdateScreen();
@@ -415,14 +427,13 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 	SSD1306_GotoXY (37, 50);
 	SSD1306_Puts ("EEI-3/1", &Font_7x10, 1); // print Hello
 
-
 	SSD1306_UpdateScreen(); // update screen
-
 
  }
 
  void statechart_start_program( Statechart* handle){
 	SSD1306_Clear();
+
 	SSD1306_GotoXY (5,0); // goto 0, 0
 	SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
 	SSD1306_GotoXY (110,0); // goto 0, 0
@@ -503,46 +514,10 @@ int main(void)
   SSD1306_Init (); // initialise the display
 
   /*
-  SSD1306_GotoXY (5,0); // goto 0, 0
-  SSD1306_Puts ("Ch1:", &Font_7x10, 1); // print Ch1:
-  SSD1306_GotoXY (110,0); // goto 0, 0
-  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-  SSD1306_GotoXY (5, 10);
-  SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
-  SSD1306_GotoXY (110,10); // goto 0, 0
-  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-  SSD1306_GotoXY (5, 20);
-  SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
-  SSD1306_GotoXY (110,20); // goto 0, 0
-  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-  SSD1306_GotoXY (5, 33);
-  SSD1306_Puts ("Ch2:", &Font_7x10, 1); // print Hello
-  SSD1306_GotoXY (110,33); // goto 0, 0
-  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-  SSD1306_GotoXY (5, 43);
-  SSD1306_Puts ("Min:", &Font_7x10, 1); // print Hello
-  SSD1306_GotoXY (110,43); // goto 0, 0
-  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-  SSD1306_GotoXY (5, 53);
-  SSD1306_Puts ("Max:", &Font_7x10, 1); // print Hello
-  SSD1306_GotoXY (110,53); // goto 0, 0
-  SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
-
-  SSD1306_UpdateScreen(); // update screen
-	*/
-
-
-
-
   uint16_t config = VEML7700_GAIN_1_4 | VEML7700_IT_25MS;
   HAL_I2C_Mem_Write(&hi2c2, VEML7700_ADDR, VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&config, 2, 10);
   HAL_I2C_Mem_Write(&hi2c1, VEML7700_ADDR, VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&config, 2, 10);
-
+  */
 
 
 

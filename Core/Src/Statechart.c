@@ -52,6 +52,7 @@ static void exseq_main_orth_r2_high_speed_mode(Statechart* handle);
 static void exseq_main_orth_r2_low_light_mode(Statechart* handle);
 static void exseq_main_welcome(Statechart* handle);
 static void exseq_main(Statechart* handle);
+static void react_main_orth_r1__choice_2(Statechart* handle);
 static void react_main__entry_Default(Statechart* handle);
 static void react_main__sync0(Statechart* handle);
 
@@ -470,14 +471,14 @@ static void enact_main_orth_r1_Read_I2C(Statechart* handle)
 static void enact_main_orth_r1_Process_I2C(Statechart* handle)
 {
 	/* Entry action for state 'Process I2C'. */
-	statechart_process_i2c_samples(handle,handle->internal.sample_no);
+	statechart_process_i2c_samples(handle,handle->internal.sample_no, handle->iface.mode_type);
 	handle->completed = bool_true;
 }
 
 static void enact_main_orth_r1_Send_uart(Statechart* handle)
 {
 	/* Entry action for state 'Send uart'. */
-	statechart_process_data_oled(handle,handle->internal.iterration_number);
+	statechart_process_data_oled(handle,handle->iface.required_sample_no, handle->internal.iterration_number);
 	statechart_send_data_uart(handle);
 	handle->completed = bool_true;
 }
@@ -493,8 +494,7 @@ static void enact_main_orth_r1_Oled(Statechart* handle)
 static void enact_main_orth_r2_normal_mode(Statechart* handle)
 {
 	/* Entry action for state 'normal_mode'. */
-	statechart_set_mode_type(handle, 0);
-	statechart_internal_set_timer_required(handle, 50);
+	statechart_internal_set_timer_required(handle, 100);
 	statechart_set_required_sample_no(handle, 5);
 	statechart_set_auto_gain(handle, 1);
 }
@@ -504,7 +504,7 @@ static void enact_main_orth_r2_high_speed_mode(Statechart* handle)
 {
 	/* Entry action for state 'high_speed_mode'. */
 	statechart_set_mode_type(handle, 1);
-	statechart_internal_set_timer_required(handle, 80);
+	statechart_internal_set_timer_required(handle, 160);
 	statechart_set_required_sample_no(handle, 8);
 	statechart_set_auto_gain(handle, 0);
 }
@@ -514,7 +514,7 @@ static void enact_main_orth_r2_low_light_mode(Statechart* handle)
 {
 	/* Entry action for state 'low_light_mode'. */
 	statechart_set_mode_type(handle, 2);
-	statechart_internal_set_timer_required(handle, 20);
+	statechart_internal_set_timer_required(handle, 40);
 	statechart_set_required_sample_no(handle, 2);
 }
 
@@ -551,6 +551,7 @@ static void exact_main_orth_r2_normal_mode(Statechart* handle)
 {
 	/* Exit action for state 'normal_mode'. */
 	statechart_internal_set_mode_transition(handle, 1);
+	statechart_set_mode_type(handle, 1);
 }
 
 /* Exit action for state 'high_speed_mode'. */
@@ -558,6 +559,7 @@ static void exact_main_orth_r2_high_speed_mode(Statechart* handle)
 {
 	/* Exit action for state 'high_speed_mode'. */
 	statechart_internal_set_mode_transition(handle, 1);
+	statechart_set_mode_type(handle, 2);
 }
 
 /* Exit action for state 'low_light_mode'. */
@@ -565,6 +567,7 @@ static void exact_main_orth_r2_low_light_mode(Statechart* handle)
 {
 	/* Exit action for state 'low_light_mode'. */
 	statechart_internal_set_mode_transition(handle, 1);
+	statechart_set_mode_type(handle, 0);
 }
 
 /* 'default' enter sequence for state screen */
@@ -819,6 +822,22 @@ static void exseq_main(Statechart* handle)
 	}
 }
 
+/* The reactions of state null. */
+static void react_main_orth_r1__choice_2(Statechart* handle)
+{
+	/* The reactions of state null. */
+	if ((handle->internal.mode_transition) == (1))
+	{ 
+		statechart_internal_set_mode_transition(handle, 0);
+		statechart_internal_set_sample_no(handle, 0);
+		statechart_internal_set_iterration_number(handle, 0);
+		enseq_main_orth_r1_screen_default(handle);
+	}  else
+	{
+		enseq_main_orth_r1_Read_I2C_default(handle);
+	}
+}
+
 /* Default react sequence for initial entry  */
 static void react_main__entry_Default(Statechart* handle)
 {
@@ -885,20 +904,9 @@ static sc_integer main_orth_r1_Wait_for_timer_react(Statechart* handle, const sc
 			if (handle->iface.timer_interrupt_raised == bool_true)
 			{ 
 				exseq_main_orth_r1_Wait_for_timer(handle);
-				enseq_main_orth_r1_Read_I2C_default(handle);
+				react_main_orth_r1__choice_2(handle);
 				transitioned_after = 0;
-			}  else
-			{
-				if ((handle->internal.mode_transition) == (1))
-				{ 
-					exseq_main_orth_r1_Wait_for_timer(handle);
-					statechart_internal_set_mode_transition(handle, 0);
-					statechart_internal_set_sample_no(handle, 0);
-					statechart_internal_set_iterration_number(handle, 0);
-					enseq_main_orth_r1_screen_default(handle);
-					transitioned_after = 0;
-				} 
-			}
+			} 
 		} 
 	} return transitioned_after;
 }
