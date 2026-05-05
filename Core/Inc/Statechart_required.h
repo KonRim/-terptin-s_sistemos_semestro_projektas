@@ -23,6 +23,9 @@ This state machine makes use of operations declared in the state machines interf
 - statechart_start_program
 - statechart_process_i2c_samples
 - statechart_process_data_oled
+- statechart_display_mode_type
+- statechart_change_timer_and_sensor
+- statechart_zero_data
 are defined.
 
 These functions will be called during a 'run to completion step' (runCycle) of the statechart. 
@@ -37,6 +40,9 @@ extern void statechart_prepare_oled_screen( Statechart* handle);
 extern void statechart_start_program( Statechart* handle);
 extern void statechart_process_i2c_samples( Statechart* handle, const sc_integer sample_no);
 extern void statechart_process_data_oled( Statechart* handle, const sc_integer iterration_number);
+extern void statechart_display_mode_type( Statechart* handle, const sc_integer mode_type);
+extern void statechart_change_timer_and_sensor( Statechart* handle, const sc_integer mode_type);
+extern void statechart_zero_data( Statechart* handle);
 
 
 

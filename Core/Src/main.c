@@ -288,7 +288,7 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 	    	         new_step = 3;  // 2x — maximum sensitivity for low light
 	    	     } else if (lux < 100.0f) {
 	    	         new_step = 2;  // 1x
-	    	     } else if (lux < 50000.0f) {
+	    	     } else if (lux < 10000.0f) {
 	    	         new_step = 1;  // 1/4x
 	    	     } else {
 	    	         new_step = 0;  // 1/8x — minimum sensitivity for bright light
@@ -329,6 +329,21 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 	 		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)value, len);
 	*/
  }
+  void statechart_display_mode_type( Statechart* handle, const sc_integer mode_type){
+
+
+  }
+
+  void statechart_change_timer_and_sensor( Statechart* handle, const sc_integer mode_type){
+	  HAL_TIM_Base_Start_IT(&htim6);
+  }
+  void statechart_zero_data( Statechart* handle){
+
+  }
+
+
+
+
  void statechart_process_data_oled( Statechart* handle, const sc_integer iterration_number){
 	 for (int i= 0; i< 2; i++) {
 	     average_sensor[i] = sum_sensor[i] / SAMPLE_NUMBER;
@@ -439,7 +454,8 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain) {
 	SSD1306_Puts ("lx", &Font_7x10, 1); // print lx
 
 	SSD1306_UpdateScreen(); // update screen
-	HAL_TIM_Base_Start_IT(&htim6);
+	__HAL_TIM_SET_COUNTER(&htim6, 0);
+
  }
 /* USER CODE END 0 */
 
