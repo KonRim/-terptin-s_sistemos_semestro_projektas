@@ -16,4 +16,6 @@
 // Integration time options
 #define VEML7700_IT_25MS    0x0300
 
+#define VEML7700_ALS_SD_ON      0x0000  // bit 0 = 0, sensor active
+#define VEML7700_ALS_SD_STANDBY 0x0001  // bit 0 = 1, sensor standby
 
