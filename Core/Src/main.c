@@ -38,10 +38,6 @@
 /* USER CODE BEGIN PD */
 
 
-#define VEML7700_COEF_A  6.0135e-13f
-#define VEML7700_COEF_B -9.3924e-09f
-#define VEML7700_COEF_C  8.1488e-05f
-#define VEML7700_COEF_D  1.0023
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -63,58 +59,45 @@ DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
 
+//Flags for I2C DMA callback
+volatile uint8_t i2c1_done=0;
+volatile uint8_t i2c2_done=0;
 
-uint8_t i2c1_done=0;
-uint8_t i2c2_done=0;
-uint8_t  Rx_buffer[4];          // 2 bytes per channel
-uint16_t value_raw[2];
-float    normal_value[2];
-float    sum_sensor[2];
-float    uart_min[2];
-float    uart_max[2];
-int uart_counter=0;
+static uint8_t  Rx_buffer[4];          // 2 bytes per channel
+static uint16_t value_raw[2];
+static float    normal_value[2];
+static float    sum_sensor[2];
+static float    uart_min[2];
+static float    uart_max[2];
+static float 	average_sensor[2];
+static float 	sum_sensor_oled[2];
 
 
 static I2C_HandleTypeDef *hi2c_ch[2] = {&hi2c1, &hi2c2};
 
 float oled_min[2];
 float oled_max[2];
-char msg[200];
-float average_sensor[2];
-float sum_sensor_oled[2];
-char value[200];
 
-static uint8_t current_gain_step[2] = {1, 1};  // one per channel
-
-static const uint16_t gain_steps[] = {
-	VEML7700_GAIN_1_8,   // 0 — lowest sensitivity
-	VEML7700_GAIN_1_4,   // 1
-	VEML7700_GAIN_1,     // 2
-	VEML7700_GAIN_2
-		 // 1
-};
-
-
-static const uint16_t it_time[] = {
-	VEML7700_IT_25MS,   // 0 — lowest sensitivity
-	VEML7700_IT_100MS,       // 3 — highest sensitivity
-};
+//For debugging
+static char msg[200];
+volatile int uart_counter=0;
 
 
 
+// Current gain tracking (one per channel)
+static uint8_t current_gain_step[2] = {1, 1};
 
-static const float lux_resolution[] = {
-    2.1504f,   // step 0 — GAIN 1/8x
-    1.0752f,   // step 1 — GAIN 1/4x
-    0.2688f,   // step 2 — GAIN 1x
-    0.1344f    // step 3 — GAIN 2x
-};
+// Bits, needed to be sent for different gains (gain 1/8x, 1/4x, 1x, 2x)
+static const uint16_t gain_steps[] = {VEML7700_GAIN_1_8, VEML7700_GAIN_1_4, VEML7700_GAIN_1,  VEML7700_GAIN_2};
 
+// Bits, needed to be sent for different integration times (25ms and 100ms)
+static const uint16_t it_time[] = {VEML7700_IT_25MS,   VEML7700_IT_100MS};
 
-
-
+//Lux resolutions for 25ms integration time (gain 1/8x, 1/4x, 1x, 2x)
+static const float lux_resolution[] = {2.1504,  1.0752, 0.2688,   0.1344};
 
 Statechart sc_handle; // Statechart pointer
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -134,32 +117,13 @@ static void MX_TIM7_Init(void);
 /* USER CODE BEGIN 0 */
 
 
-void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain, uint16_t integration_time) {
-    uint8_t conf_buf[2];
-    uint16_t conf;
-
-    // step 1 — enter standby
-    conf = VEML7700_ALS_SD_STANDBY;
-    conf_buf[0] = conf & 0xFF;
-    conf_buf[1] = (conf >> 8) & 0xFF;
-    HAL_I2C_Mem_Write(hi2c, VEML7700_ADDR,
-                      VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT,
-                      conf_buf, 2, HAL_MAX_DELAY);
-
-    // step 2 — write new gain with sensor active (ALS_SD = 0)
-    conf = gain | VEML7700_ALS_SD_ON |integration_time;
-    conf_buf[0] = conf & 0xFF;
-    conf_buf[1] = (conf >> 8) & 0xFF;
-    HAL_I2C_Mem_Write(hi2c, VEML7700_ADDR,
-                      VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT,
-                      conf_buf, 2, HAL_MAX_DELAY);
-}
 
 
- void statechart_read_i2c_sensors( Statechart* handle){
+
+void statechart_read_i2c_sensors( Statechart* handle){
 	 HAL_I2C_Mem_Read_DMA(&hi2c1, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, &Rx_buffer[0], 2);
 	 HAL_I2C_Mem_Read_DMA(&hi2c2, VEML7700_ADDR, VEML7700_REG_ALS, I2C_MEMADD_SIZE_8BIT, &Rx_buffer[2], 2);
- }
+}
 
  void statechart_send_data_uart( Statechart* handle){
 	 /*
@@ -239,7 +203,7 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain, uint16_t integrat
 	     else {
 	    	 normal_value[i] = value_raw[i] *  lux_resolution[current_gain_step[i]];
 	     }
-	     if(normal_value[i]>1000.0){
+	     if(normal_value[i]>1000.0f){
 	    	 float x = normal_value[i];
 	    	 normal_value[i] = (VEML7700_COEF_A * x*x*x*x)
 	    	                  + (VEML7700_COEF_B * x*x*x)
@@ -263,7 +227,7 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain, uint16_t integrat
 	    	     // only write to sensor if gain actually needs to change
 	    	     if (new_step != current_gain_step[i]) {
 	    	         current_gain_step[i] = new_step;
-	    	         veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
+	    	         VEML7700_Set_Gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
 	    	     }
 	     	}
 
@@ -353,7 +317,7 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain, uint16_t integrat
 				__HAL_TIM_SET_AUTORELOAD(&htim6, 39);
 				for(int i=0; i<2; i++){
 						current_gain_step[i]=1;
-						veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
+						VEML7700_Set_Gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
 					  }
 				break;
 
@@ -361,7 +325,7 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain, uint16_t integrat
 	            __HAL_TIM_SET_AUTORELOAD(&htim6, 24);
 	            for(int i=0; i<2; i++){
 						current_gain_step[i]=1;
-						veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
+						VEML7700_Set_Gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[0]);
 					  }
 	            break;
 
@@ -369,7 +333,7 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain, uint16_t integrat
 	            __HAL_TIM_SET_AUTORELOAD(&htim6, 99);
 	            for(int i=0; i<2; i++){
 						current_gain_step[i]=3;
-						veml7700_set_gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[1]);
+						VEML7700_Set_Gain(hi2c_ch[i], gain_steps[current_gain_step[i]], it_time[1]);
 					  }
 	            break;
 	    }
@@ -405,7 +369,6 @@ void veml7700_set_gain(I2C_HandleTypeDef *hi2c, uint16_t gain, uint16_t integrat
  }
 
  void statechart_prepare_oled_screen( Statechart* handle){
-
 	 SSD1306_DrawFilledRectangle(35, 0, 75, 63, 0);
 	 SSD1306_UpdateScreen();
  }
@@ -507,17 +470,11 @@ int main(void)
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
+  //For debugging
   HAL_TIM_Base_Start_IT(&htim7);
-
-
 
   SSD1306_Init (); // initialise the display
 
-  /*
-  uint16_t config = VEML7700_GAIN_1_4 | VEML7700_IT_25MS;
-  HAL_I2C_Mem_Write(&hi2c2, VEML7700_ADDR, VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&config, 2, 10);
-  HAL_I2C_Mem_Write(&hi2c1, VEML7700_ADDR, VEML7700_REG_CONF, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&config, 2, 10);
-  */
 
 
 
@@ -703,7 +660,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 47999;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 39;
+  htim6.Init.Period = 49;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
