@@ -52,17 +52,17 @@ Header of the state machine 'Statechart'.
 #define STATECHART_MAX_ORTHOGONAL_STATES 2
 
 /*! Define indices of states in the StateConfVector */
-#define SCVI_STATECHART_MAIN_ORTH 0
-#define SCVI_STATECHART_MAIN_ORTH_R1_SCREEN 0
-#define SCVI_STATECHART_MAIN_ORTH_R1_WAIT_FOR_TIMER 0
-#define SCVI_STATECHART_MAIN_ORTH_R1_READ_I2C 0
-#define SCVI_STATECHART_MAIN_ORTH_R1_PROCESS_I2C 0
-#define SCVI_STATECHART_MAIN_ORTH_R1_SEND_UART 0
-#define SCVI_STATECHART_MAIN_ORTH_R1_OLED 0
-#define SCVI_STATECHART_MAIN_ORTH_R2_NORMAL_MODE 1
-#define SCVI_STATECHART_MAIN_ORTH_R2_HIGH_SPEED_MODE 1
-#define SCVI_STATECHART_MAIN_ORTH_R2_LOW_LIGHT_MODE 1
-#define SCVI_STATECHART_MAIN_WELCOME 0
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM 0
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_DISPLAY_MODE_TYPE 0
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_WAIT_FOR_TIMER 0
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_READ_I2C_SENSORS 0
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_PROCESS_I2C_SAMPLES 0
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_SEND_DATA_UART 0
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_SEND_DATA_OLED 0
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R2_REGULAR_MODE 1
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R2_HIGH_SPEED_MODE 1
+#define SCVI_STATECHART_MAIN_MAIN_PROGRAM_R2_LOW_LIGHT_MODE 1
+#define SCVI_STATECHART_MAIN_WELCOME_PAGE 0
 
 
 /* 
@@ -97,17 +97,17 @@ typedef struct statechart_eventqueue_s {
 typedef enum
 {
 	Statechart_last_state,
-	Statechart_main_orth,
-	Statechart_main_orth_r1_screen,
-	Statechart_main_orth_r1_Wait_for_timer,
-	Statechart_main_orth_r1_Read_I2C,
-	Statechart_main_orth_r1_Process_I2C,
-	Statechart_main_orth_r1_Send_uart,
-	Statechart_main_orth_r1_Oled,
-	Statechart_main_orth_r2_normal_mode,
-	Statechart_main_orth_r2_high_speed_mode,
-	Statechart_main_orth_r2_low_light_mode,
-	Statechart_main_welcome
+	Statechart_main_Main_program,
+	Statechart_main_Main_program_r1_Display_mode_type,
+	Statechart_main_Main_program_r1_Wait_for_timer,
+	Statechart_main_Main_program_r1_Read_I2C_sensors,
+	Statechart_main_Main_program_r1_Process_I2C_samples,
+	Statechart_main_Main_program_r1_Send_data_UART,
+	Statechart_main_Main_program_r1_Send_data_OLED,
+	Statechart_main_Main_program_r2_Regular_mode,
+	Statechart_main_Main_program_r2_High_speed_mode,
+	Statechart_main_Main_program_r2_Low_light_mode,
+	Statechart_main_Welcome_page
 } StatechartStates;
 
 
@@ -117,8 +117,6 @@ struct StatechartIface
 	sc_boolean timer_interrupt_raised;
 	sc_boolean i2c_callback_sensors_raised;
 	sc_boolean user_button_raised;
-	sc_integer required_sample_no;
-	sc_integer mode_type;
 };
 
 
@@ -126,12 +124,14 @@ struct StatechartIface
 /*! Type declaration of the data structure for the StatechartInternal interface scope. */
 struct StatechartInternal
 {
+	sc_integer mode_type;
 	sc_integer transition_flag;
+	sc_integer mode_transition;
+	sc_integer required_sample_no;
 	sc_integer sample_no;
 	sc_integer iterration_number;
 	sc_integer timer_required;
 	sc_integer timer_counter;
-	sc_integer mode_transition;
 };
 
 
@@ -181,14 +181,6 @@ extern void statechart_raise_timer_interrupt(Statechart* handle);
 extern void statechart_raise_i2c_callback_sensors(Statechart* handle);
 /*! Raises the in event 'user_button' that is defined in the default interface scope. */ 
 extern void statechart_raise_user_button(Statechart* handle);
-/*! Gets the value of the variable 'required_sample_no' that is defined in the default interface scope. */ 
-extern sc_integer statechart_get_required_sample_no(const Statechart* handle);
-/*! Sets the value of the variable 'required_sample_no' that is defined in the default interface scope. */ 
-extern void statechart_set_required_sample_no(Statechart* handle, sc_integer value);
-/*! Gets the value of the variable 'mode_type' that is defined in the default interface scope. */ 
-extern sc_integer statechart_get_mode_type(const Statechart* handle);
-/*! Sets the value of the variable 'mode_type' that is defined in the default interface scope. */ 
-extern void statechart_set_mode_type(Statechart* handle, sc_integer value);
 
 /*!
  * Checks whether the state machine is active (until 2.4.1 this method was used for states).

@@ -15,78 +15,78 @@ Implementation of the state machine 'Statechart'
 #endif
 
 /* prototypes of all internal functions */
-static void enact_main_orth_r1_screen(Statechart* handle);
-static void enact_main_orth_r1_Read_I2C(Statechart* handle);
-static void enact_main_orth_r1_Process_I2C(Statechart* handle);
-static void enact_main_orth_r1_Send_uart(Statechart* handle);
-static void enact_main_orth_r1_Oled(Statechart* handle);
-static void enact_main_orth_r2_normal_mode(Statechart* handle);
-static void enact_main_orth_r2_high_speed_mode(Statechart* handle);
-static void enact_main_orth_r2_low_light_mode(Statechart* handle);
-static void enact_main_welcome(Statechart* handle);
-static void exact_main_orth_r1_Process_I2C(Statechart* handle);
-static void exact_main_orth_r1_Send_uart(Statechart* handle);
-static void exact_main_orth_r2_normal_mode(Statechart* handle);
-static void exact_main_orth_r2_high_speed_mode(Statechart* handle);
-static void exact_main_orth_r2_low_light_mode(Statechart* handle);
-static void enseq_main_orth_r1_screen_default(Statechart* handle);
-static void enseq_main_orth_r1_Wait_for_timer_default(Statechart* handle);
-static void enseq_main_orth_r1_Read_I2C_default(Statechart* handle);
-static void enseq_main_orth_r1_Process_I2C_default(Statechart* handle);
-static void enseq_main_orth_r1_Send_uart_default(Statechart* handle);
-static void enseq_main_orth_r1_Oled_default(Statechart* handle);
-static void enseq_main_orth_r2_normal_mode_default(Statechart* handle);
-static void enseq_main_orth_r2_high_speed_mode_default(Statechart* handle);
-static void enseq_main_orth_r2_low_light_mode_default(Statechart* handle);
-static void enseq_main_welcome_default(Statechart* handle);
+static void enact_main_Main_program_r1_Display_mode_type(Statechart* handle);
+static void enact_main_Main_program_r1_Read_I2C_sensors(Statechart* handle);
+static void enact_main_Main_program_r1_Process_I2C_samples(Statechart* handle);
+static void enact_main_Main_program_r1_Send_data_UART(Statechart* handle);
+static void enact_main_Main_program_r1_Send_data_OLED(Statechart* handle);
+static void enact_main_Main_program_r2_Regular_mode(Statechart* handle);
+static void enact_main_Main_program_r2_High_speed_mode(Statechart* handle);
+static void enact_main_Main_program_r2_Low_light_mode(Statechart* handle);
+static void enact_main_Welcome_page(Statechart* handle);
+static void exact_main_Main_program_r1_Process_I2C_samples(Statechart* handle);
+static void exact_main_Main_program_r1_Send_data_UART(Statechart* handle);
+static void exact_main_Main_program_r2_Regular_mode(Statechart* handle);
+static void exact_main_Main_program_r2_High_speed_mode(Statechart* handle);
+static void exact_main_Main_program_r2_Low_light_mode(Statechart* handle);
+static void enseq_main_Main_program_r1_Display_mode_type_default(Statechart* handle);
+static void enseq_main_Main_program_r1_Wait_for_timer_default(Statechart* handle);
+static void enseq_main_Main_program_r1_Read_I2C_sensors_default(Statechart* handle);
+static void enseq_main_Main_program_r1_Process_I2C_samples_default(Statechart* handle);
+static void enseq_main_Main_program_r1_Send_data_UART_default(Statechart* handle);
+static void enseq_main_Main_program_r1_Send_data_OLED_default(Statechart* handle);
+static void enseq_main_Main_program_r2_Regular_mode_default(Statechart* handle);
+static void enseq_main_Main_program_r2_High_speed_mode_default(Statechart* handle);
+static void enseq_main_Main_program_r2_Low_light_mode_default(Statechart* handle);
+static void enseq_main_Welcome_page_default(Statechart* handle);
 static void enseq_main_default(Statechart* handle);
-static void exseq_main_orth_r1_screen(Statechart* handle);
-static void exseq_main_orth_r1_Wait_for_timer(Statechart* handle);
-static void exseq_main_orth_r1_Read_I2C(Statechart* handle);
-static void exseq_main_orth_r1_Process_I2C(Statechart* handle);
-static void exseq_main_orth_r1_Send_uart(Statechart* handle);
-static void exseq_main_orth_r1_Oled(Statechart* handle);
-static void exseq_main_orth_r2_normal_mode(Statechart* handle);
-static void exseq_main_orth_r2_high_speed_mode(Statechart* handle);
-static void exseq_main_orth_r2_low_light_mode(Statechart* handle);
-static void exseq_main_welcome(Statechart* handle);
+static void exseq_main_Main_program_r1_Display_mode_type(Statechart* handle);
+static void exseq_main_Main_program_r1_Wait_for_timer(Statechart* handle);
+static void exseq_main_Main_program_r1_Read_I2C_sensors(Statechart* handle);
+static void exseq_main_Main_program_r1_Process_I2C_samples(Statechart* handle);
+static void exseq_main_Main_program_r1_Send_data_UART(Statechart* handle);
+static void exseq_main_Main_program_r1_Send_data_OLED(Statechart* handle);
+static void exseq_main_Main_program_r2_Regular_mode(Statechart* handle);
+static void exseq_main_Main_program_r2_High_speed_mode(Statechart* handle);
+static void exseq_main_Main_program_r2_Low_light_mode(Statechart* handle);
+static void exseq_main_Welcome_page(Statechart* handle);
 static void exseq_main(Statechart* handle);
-static void react_main_orth_r1__choice_2(Statechart* handle);
+static void react_main_Main_program_r1__choice_2(Statechart* handle);
 static void react_main__entry_Default(Statechart* handle);
 static void react_main__sync0(Statechart* handle);
 
-/*! The reactions of state orth. */
-static sc_integer main_orth_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Main_program. */
+static sc_integer main_Main_program_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state screen. */
-static sc_integer main_orth_r1_screen_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Display_mode_type. */
+static sc_integer main_Main_program_r1_Display_mode_type_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state Wait for timer. */
-static sc_integer main_orth_r1_Wait_for_timer_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Wait_for_timer. */
+static sc_integer main_Main_program_r1_Wait_for_timer_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state Read I2C. */
-static sc_integer main_orth_r1_Read_I2C_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Read_I2C_sensors. */
+static sc_integer main_Main_program_r1_Read_I2C_sensors_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state Process I2C. */
-static sc_integer main_orth_r1_Process_I2C_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Process_I2C_samples. */
+static sc_integer main_Main_program_r1_Process_I2C_samples_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state Send uart. */
-static sc_integer main_orth_r1_Send_uart_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Send_data_UART. */
+static sc_integer main_Main_program_r1_Send_data_UART_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state Oled. */
-static sc_integer main_orth_r1_Oled_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Send_data_OLED. */
+static sc_integer main_Main_program_r1_Send_data_OLED_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state normal_mode. */
-static sc_integer main_orth_r2_normal_mode_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Regular_mode. */
+static sc_integer main_Main_program_r2_Regular_mode_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state high_speed_mode. */
-static sc_integer main_orth_r2_high_speed_mode_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state High_speed_mode. */
+static sc_integer main_Main_program_r2_High_speed_mode_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state low_light_mode. */
-static sc_integer main_orth_r2_low_light_mode_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Low_light_mode. */
+static sc_integer main_Main_program_r2_Low_light_mode_react(Statechart* handle, const sc_integer transitioned_before);
 
-/*! The reactions of state welcome. */
-static sc_integer main_welcome_react(Statechart* handle, const sc_integer transitioned_before);
+/*! The reactions of state Welcome_page. */
+static sc_integer main_Welcome_page_react(Statechart* handle, const sc_integer transitioned_before);
 
 
 static void clear_in_events(Statechart* handle);
@@ -99,7 +99,13 @@ static void run_cycle(Statechart* handle);
 
 
 
+static void statechart_internal_set_mode_type(Statechart* handle, sc_integer value)
+;
 static void statechart_internal_set_transition_flag(Statechart* handle, sc_integer value)
+;
+static void statechart_internal_set_mode_transition(Statechart* handle, sc_integer value)
+;
+static void statechart_internal_set_required_sample_no(Statechart* handle, sc_integer value)
 ;
 static void statechart_internal_set_sample_no(Statechart* handle, sc_integer value)
 ;
@@ -108,8 +114,6 @@ static void statechart_internal_set_iterration_number(Statechart* handle, sc_int
 static void statechart_internal_set_timer_required(Statechart* handle, sc_integer value)
 ;
 static void statechart_internal_set_timer_counter(Statechart* handle, sc_integer value)
-;
-static void statechart_internal_set_mode_transition(Statechart* handle, sc_integer value)
 ;
 
 
@@ -138,14 +142,14 @@ void statechart_init(Statechart* handle)
 	
 	
 	/* Default init sequence for statechart Statechart */
-	statechart_set_required_sample_no(handle, 5);
-	statechart_set_mode_type(handle, 0);
+	statechart_internal_set_mode_type(handle, 0);
 	statechart_internal_set_transition_flag(handle, 0);
+	statechart_internal_set_mode_transition(handle, 0);
+	statechart_internal_set_required_sample_no(handle, 5);
 	statechart_internal_set_sample_no(handle, 0);
 	statechart_internal_set_iterration_number(handle, 0);
-	statechart_internal_set_timer_required(handle, 5);
+	statechart_internal_set_timer_required(handle, 100);
 	statechart_internal_set_timer_counter(handle, 0);
-	statechart_internal_set_mode_transition(handle, 0);
 	
 	handle->isExecuting = bool_false;
 	statechart_eventqueue_init(&handle->in_event_queue, handle->in_buffer, STATECHART_IN_EVENTQUEUE_BUFFERSIZE);
@@ -227,48 +231,48 @@ sc_boolean statechart_is_state_active(const Statechart* handle, StatechartStates
 	sc_boolean result = bool_false;
 	switch (state)
 	{
-		case Statechart_main_orth :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH] >= Statechart_main_orth
-				&& handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH] <= Statechart_main_orth_r2_low_light_mode);
+		case Statechart_main_Main_program :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM] >= Statechart_main_Main_program
+				&& handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM] <= Statechart_main_Main_program_r2_Low_light_mode);
 				break;
-		case Statechart_main_orth_r1_screen :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R1_SCREEN] == Statechart_main_orth_r1_screen
+		case Statechart_main_Main_program_r1_Display_mode_type :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_DISPLAY_MODE_TYPE] == Statechart_main_Main_program_r1_Display_mode_type
 			);
 				break;
-		case Statechart_main_orth_r1_Wait_for_timer :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R1_WAIT_FOR_TIMER] == Statechart_main_orth_r1_Wait_for_timer
+		case Statechart_main_Main_program_r1_Wait_for_timer :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_WAIT_FOR_TIMER] == Statechart_main_Main_program_r1_Wait_for_timer
 			);
 				break;
-		case Statechart_main_orth_r1_Read_I2C :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R1_READ_I2C] == Statechart_main_orth_r1_Read_I2C
+		case Statechart_main_Main_program_r1_Read_I2C_sensors :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_READ_I2C_SENSORS] == Statechart_main_Main_program_r1_Read_I2C_sensors
 			);
 				break;
-		case Statechart_main_orth_r1_Process_I2C :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R1_PROCESS_I2C] == Statechart_main_orth_r1_Process_I2C
+		case Statechart_main_Main_program_r1_Process_I2C_samples :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_PROCESS_I2C_SAMPLES] == Statechart_main_Main_program_r1_Process_I2C_samples
 			);
 				break;
-		case Statechart_main_orth_r1_Send_uart :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R1_SEND_UART] == Statechart_main_orth_r1_Send_uart
+		case Statechart_main_Main_program_r1_Send_data_UART :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_SEND_DATA_UART] == Statechart_main_Main_program_r1_Send_data_UART
 			);
 				break;
-		case Statechart_main_orth_r1_Oled :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R1_OLED] == Statechart_main_orth_r1_Oled
+		case Statechart_main_Main_program_r1_Send_data_OLED :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R1_SEND_DATA_OLED] == Statechart_main_Main_program_r1_Send_data_OLED
 			);
 				break;
-		case Statechart_main_orth_r2_normal_mode :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R2_NORMAL_MODE] == Statechart_main_orth_r2_normal_mode
+		case Statechart_main_Main_program_r2_Regular_mode :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R2_REGULAR_MODE] == Statechart_main_Main_program_r2_Regular_mode
 			);
 				break;
-		case Statechart_main_orth_r2_high_speed_mode :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R2_HIGH_SPEED_MODE] == Statechart_main_orth_r2_high_speed_mode
+		case Statechart_main_Main_program_r2_High_speed_mode :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R2_HIGH_SPEED_MODE] == Statechart_main_Main_program_r2_High_speed_mode
 			);
 				break;
-		case Statechart_main_orth_r2_low_light_mode :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_ORTH_R2_LOW_LIGHT_MODE] == Statechart_main_orth_r2_low_light_mode
+		case Statechart_main_Main_program_r2_Low_light_mode :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_MAIN_PROGRAM_R2_LOW_LIGHT_MODE] == Statechart_main_Main_program_r2_Low_light_mode
 			);
 				break;
-		case Statechart_main_welcome :
-			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_WELCOME] == Statechart_main_welcome
+		case Statechart_main_Welcome_page :
+			result = (sc_boolean) (handle->stateConfVector[SCVI_STATECHART_MAIN_WELCOME_PAGE] == Statechart_main_Welcome_page
 			);
 				break;
 			default:
@@ -291,39 +295,39 @@ static void micro_step(Statechart* handle)
 	handle->stateConfVectorPosition = 0;
 	switch(handle->stateConfVector[ 0 ])
 	{
-		case Statechart_main_orth_r1_screen :
+		case Statechart_main_Main_program_r1_Display_mode_type :
 		{
-			transitioned = main_orth_r1_screen_react(handle,transitioned);
+			transitioned = main_Main_program_r1_Display_mode_type_react(handle,transitioned);
 			break;
 		}
-		case Statechart_main_orth_r1_Wait_for_timer :
+		case Statechart_main_Main_program_r1_Wait_for_timer :
 		{
-			transitioned = main_orth_r1_Wait_for_timer_react(handle,transitioned);
+			transitioned = main_Main_program_r1_Wait_for_timer_react(handle,transitioned);
 			break;
 		}
-		case Statechart_main_orth_r1_Read_I2C :
+		case Statechart_main_Main_program_r1_Read_I2C_sensors :
 		{
-			transitioned = main_orth_r1_Read_I2C_react(handle,transitioned);
+			transitioned = main_Main_program_r1_Read_I2C_sensors_react(handle,transitioned);
 			break;
 		}
-		case Statechart_main_orth_r1_Process_I2C :
+		case Statechart_main_Main_program_r1_Process_I2C_samples :
 		{
-			transitioned = main_orth_r1_Process_I2C_react(handle,transitioned);
+			transitioned = main_Main_program_r1_Process_I2C_samples_react(handle,transitioned);
 			break;
 		}
-		case Statechart_main_orth_r1_Send_uart :
+		case Statechart_main_Main_program_r1_Send_data_UART :
 		{
-			transitioned = main_orth_r1_Send_uart_react(handle,transitioned);
+			transitioned = main_Main_program_r1_Send_data_UART_react(handle,transitioned);
 			break;
 		}
-		case Statechart_main_orth_r1_Oled :
+		case Statechart_main_Main_program_r1_Send_data_OLED :
 		{
-			transitioned = main_orth_r1_Oled_react(handle,transitioned);
+			transitioned = main_Main_program_r1_Send_data_OLED_react(handle,transitioned);
 			break;
 		}
-		case Statechart_main_welcome :
+		case Statechart_main_Welcome_page :
 		{
-			transitioned = main_welcome_react(handle,transitioned);
+			transitioned = main_Welcome_page_react(handle,transitioned);
 			break;
 		}
 		default: 
@@ -334,19 +338,19 @@ static void micro_step(Statechart* handle)
 	{ 
 		switch(handle->stateConfVector[ 1 ])
 		{
-			case Statechart_main_orth_r2_normal_mode :
+			case Statechart_main_Main_program_r2_Regular_mode :
 			{
-				main_orth_r2_normal_mode_react(handle,transitioned);
+				main_Main_program_r2_Regular_mode_react(handle,transitioned);
 				break;
 			}
-			case Statechart_main_orth_r2_high_speed_mode :
+			case Statechart_main_Main_program_r2_High_speed_mode :
 			{
-				main_orth_r2_high_speed_mode_react(handle,transitioned);
+				main_Main_program_r2_High_speed_mode_react(handle,transitioned);
 				break;
 			}
-			case Statechart_main_orth_r2_low_light_mode :
+			case Statechart_main_Main_program_r2_Low_light_mode :
 			{
-				main_orth_r2_low_light_mode_react(handle,transitioned);
+				main_Main_program_r2_Low_light_mode_react(handle,transitioned);
 				break;
 			}
 			default: 
@@ -404,26 +408,22 @@ void statechart_raise_user_button(Statechart* handle)
 
 
 
-sc_integer statechart_get_required_sample_no(const Statechart* handle)
-{
-	return handle->iface.required_sample_no;
-}
-void statechart_set_required_sample_no(Statechart* handle, sc_integer value)
-{
-	handle->iface.required_sample_no = value;
-}
-sc_integer statechart_get_mode_type(const Statechart* handle)
-{
-	return handle->iface.mode_type;
-}
-void statechart_set_mode_type(Statechart* handle, sc_integer value)
-{
-	handle->iface.mode_type = value;
-}
 
+static void statechart_internal_set_mode_type(Statechart* handle, sc_integer value)
+{
+	handle->internal.mode_type = value;
+}
 static void statechart_internal_set_transition_flag(Statechart* handle, sc_integer value)
 {
 	handle->internal.transition_flag = value;
+}
+static void statechart_internal_set_mode_transition(Statechart* handle, sc_integer value)
+{
+	handle->internal.mode_transition = value;
+}
+static void statechart_internal_set_required_sample_no(Statechart* handle, sc_integer value)
+{
+	handle->internal.required_sample_no = value;
 }
 static void statechart_internal_set_sample_no(Statechart* handle, sc_integer value)
 {
@@ -441,210 +441,209 @@ static void statechart_internal_set_timer_counter(Statechart* handle, sc_integer
 {
 	handle->internal.timer_counter = value;
 }
-static void statechart_internal_set_mode_transition(Statechart* handle, sc_integer value)
-{
-	handle->internal.mode_transition = value;
-}
 
 
 /* implementations of all internal functions */
 
-/* Entry action for state 'screen'. */
-static void enact_main_orth_r1_screen(Statechart* handle)
+/* Entry action for state 'Display_mode_type'. */
+static void enact_main_Main_program_r1_Display_mode_type(Statechart* handle)
 {
-	/* Entry action for state 'screen'. */
-	statechart_display_mode_type(handle,handle->iface.mode_type);
-	statechart_change_timer_and_sensor(handle,handle->iface.mode_type);
-	statechart_zero_data(handle);
+	/* Entry action for state 'Display_mode_type'. */
+	statechart_display_mode_type(handle,handle->internal.mode_type);
+	statechart_change_timer_and_sensor(handle,handle->internal.mode_type);
+	statechart_zero_uart_sum(handle);
+	statechart_zero_oled_sum(handle);
 	statechart_internal_set_transition_flag(handle, 1);
 }
 
-/* Entry action for state 'Read I2C'. */
-static void enact_main_orth_r1_Read_I2C(Statechart* handle)
+/* Entry action for state 'Read_I2C_sensors'. */
+static void enact_main_Main_program_r1_Read_I2C_sensors(Statechart* handle)
 {
-	/* Entry action for state 'Read I2C'. */
+	/* Entry action for state 'Read_I2C_sensors'. */
 	statechart_read_i2c_sensors(handle);
 }
 
-static void enact_main_orth_r1_Process_I2C(Statechart* handle)
+static void enact_main_Main_program_r1_Process_I2C_samples(Statechart* handle)
 {
-	/* Entry action for state 'Process I2C'. */
-	statechart_process_i2c_samples(handle,handle->internal.sample_no, handle->iface.mode_type);
+	/* Entry action for state 'Process_I2C_samples'. */
+	statechart_process_i2c_samples(handle,handle->internal.sample_no, handle->internal.mode_type);
 	handle->completed = bool_true;
 }
 
-static void enact_main_orth_r1_Send_uart(Statechart* handle)
+static void enact_main_Main_program_r1_Send_data_UART(Statechart* handle)
 {
-	/* Entry action for state 'Send uart'. */
-	statechart_process_data_oled(handle,handle->iface.required_sample_no, handle->internal.iterration_number);
+	/* Entry action for state 'Send_data_UART'. */
+	statechart_process_data_oled(handle,handle->internal.required_sample_no, handle->internal.iterration_number);
 	statechart_send_data_uart(handle);
+	statechart_zero_uart_sum(handle);
 	handle->completed = bool_true;
 }
 
-static void enact_main_orth_r1_Oled(Statechart* handle)
+static void enact_main_Main_program_r1_Send_data_OLED(Statechart* handle)
 {
-	/* Entry action for state 'Oled'. */
+	/* Entry action for state 'Send_data_OLED'. */
 	statechart_send_data_oled(handle);
+	statechart_zero_oled_sum(handle);
 	handle->completed = bool_true;
 }
 
-/* Entry action for state 'normal_mode'. */
-static void enact_main_orth_r2_normal_mode(Statechart* handle)
+/* Entry action for state 'Regular_mode'. */
+static void enact_main_Main_program_r2_Regular_mode(Statechart* handle)
 {
-	/* Entry action for state 'normal_mode'. */
+	/* Entry action for state 'Regular_mode'. */
 	statechart_internal_set_timer_required(handle, 100);
-	statechart_set_required_sample_no(handle, 5);
+	statechart_internal_set_required_sample_no(handle, 5);
 }
 
-/* Entry action for state 'high_speed_mode'. */
-static void enact_main_orth_r2_high_speed_mode(Statechart* handle)
+/* Entry action for state 'High_speed_mode'. */
+static void enact_main_Main_program_r2_High_speed_mode(Statechart* handle)
 {
-	/* Entry action for state 'high_speed_mode'. */
-	statechart_set_mode_type(handle, 1);
+	/* Entry action for state 'High_speed_mode'. */
+	statechart_internal_set_mode_type(handle, 1);
 	statechart_internal_set_timer_required(handle, 160);
-	statechart_set_required_sample_no(handle, 8);
+	statechart_internal_set_required_sample_no(handle, 8);
 }
 
-/* Entry action for state 'low_light_mode'. */
-static void enact_main_orth_r2_low_light_mode(Statechart* handle)
+/* Entry action for state 'Low_light_mode'. */
+static void enact_main_Main_program_r2_Low_light_mode(Statechart* handle)
 {
-	/* Entry action for state 'low_light_mode'. */
-	statechart_set_mode_type(handle, 2);
+	/* Entry action for state 'Low_light_mode'. */
+	statechart_internal_set_mode_type(handle, 2);
 	statechart_internal_set_timer_required(handle, 40);
-	statechart_set_required_sample_no(handle, 2);
+	statechart_internal_set_required_sample_no(handle, 2);
 }
 
-/* Entry action for state 'welcome'. */
-static void enact_main_welcome(Statechart* handle)
+/* Entry action for state 'Welcome_page'. */
+static void enact_main_Welcome_page(Statechart* handle)
 {
-	/* Entry action for state 'welcome'. */
+	/* Entry action for state 'Welcome_page'. */
 	statechart_display_welcome_page(handle);
 }
 
-/* Exit action for state 'Process I2C'. */
-static void exact_main_orth_r1_Process_I2C(Statechart* handle)
+/* Exit action for state 'Process_I2C_samples'. */
+static void exact_main_Main_program_r1_Process_I2C_samples(Statechart* handle)
 {
-	/* Exit action for state 'Process I2C'. */
+	/* Exit action for state 'Process_I2C_samples'. */
 	handle->internal.sample_no++;
 }
 
-/* Exit action for state 'Send uart'. */
-static void exact_main_orth_r1_Send_uart(Statechart* handle)
+/* Exit action for state 'Send_data_UART'. */
+static void exact_main_Main_program_r1_Send_data_UART(Statechart* handle)
 {
-	/* Exit action for state 'Send uart'. */
+	/* Exit action for state 'Send_data_UART'. */
 	handle->internal.iterration_number++;
 }
 
-/* Exit action for state 'normal_mode'. */
-static void exact_main_orth_r2_normal_mode(Statechart* handle)
+/* Exit action for state 'Regular_mode'. */
+static void exact_main_Main_program_r2_Regular_mode(Statechart* handle)
 {
-	/* Exit action for state 'normal_mode'. */
+	/* Exit action for state 'Regular_mode'. */
 	statechart_internal_set_mode_transition(handle, 1);
-	statechart_set_mode_type(handle, 1);
+	statechart_internal_set_mode_type(handle, 1);
 }
 
-/* Exit action for state 'high_speed_mode'. */
-static void exact_main_orth_r2_high_speed_mode(Statechart* handle)
+/* Exit action for state 'High_speed_mode'. */
+static void exact_main_Main_program_r2_High_speed_mode(Statechart* handle)
 {
-	/* Exit action for state 'high_speed_mode'. */
+	/* Exit action for state 'High_speed_mode'. */
 	statechart_internal_set_mode_transition(handle, 1);
-	statechart_set_mode_type(handle, 2);
+	statechart_internal_set_mode_type(handle, 2);
 }
 
-/* Exit action for state 'low_light_mode'. */
-static void exact_main_orth_r2_low_light_mode(Statechart* handle)
+/* Exit action for state 'Low_light_mode'. */
+static void exact_main_Main_program_r2_Low_light_mode(Statechart* handle)
 {
-	/* Exit action for state 'low_light_mode'. */
+	/* Exit action for state 'Low_light_mode'. */
 	statechart_internal_set_mode_transition(handle, 1);
-	statechart_set_mode_type(handle, 0);
+	statechart_internal_set_mode_type(handle, 0);
 }
 
-/* 'default' enter sequence for state screen */
-static void enseq_main_orth_r1_screen_default(Statechart* handle)
+/* 'default' enter sequence for state Display_mode_type */
+static void enseq_main_Main_program_r1_Display_mode_type_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state screen */
-	enact_main_orth_r1_screen(handle);
-	handle->stateConfVector[0] = Statechart_main_orth_r1_screen;
+	/* 'default' enter sequence for state Display_mode_type */
+	enact_main_Main_program_r1_Display_mode_type(handle);
+	handle->stateConfVector[0] = Statechart_main_Main_program_r1_Display_mode_type;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* 'default' enter sequence for state Wait for timer */
-static void enseq_main_orth_r1_Wait_for_timer_default(Statechart* handle)
+/* 'default' enter sequence for state Wait_for_timer */
+static void enseq_main_Main_program_r1_Wait_for_timer_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state Wait for timer */
-	handle->stateConfVector[0] = Statechart_main_orth_r1_Wait_for_timer;
+	/* 'default' enter sequence for state Wait_for_timer */
+	handle->stateConfVector[0] = Statechart_main_Main_program_r1_Wait_for_timer;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* 'default' enter sequence for state Read I2C */
-static void enseq_main_orth_r1_Read_I2C_default(Statechart* handle)
+/* 'default' enter sequence for state Read_I2C_sensors */
+static void enseq_main_Main_program_r1_Read_I2C_sensors_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state Read I2C */
-	enact_main_orth_r1_Read_I2C(handle);
-	handle->stateConfVector[0] = Statechart_main_orth_r1_Read_I2C;
+	/* 'default' enter sequence for state Read_I2C_sensors */
+	enact_main_Main_program_r1_Read_I2C_sensors(handle);
+	handle->stateConfVector[0] = Statechart_main_Main_program_r1_Read_I2C_sensors;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* 'default' enter sequence for state Process I2C */
-static void enseq_main_orth_r1_Process_I2C_default(Statechart* handle)
+/* 'default' enter sequence for state Process_I2C_samples */
+static void enseq_main_Main_program_r1_Process_I2C_samples_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state Process I2C */
-	enact_main_orth_r1_Process_I2C(handle);
-	handle->stateConfVector[0] = Statechart_main_orth_r1_Process_I2C;
+	/* 'default' enter sequence for state Process_I2C_samples */
+	enact_main_Main_program_r1_Process_I2C_samples(handle);
+	handle->stateConfVector[0] = Statechart_main_Main_program_r1_Process_I2C_samples;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* 'default' enter sequence for state Send uart */
-static void enseq_main_orth_r1_Send_uart_default(Statechart* handle)
+/* 'default' enter sequence for state Send_data_UART */
+static void enseq_main_Main_program_r1_Send_data_UART_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state Send uart */
-	enact_main_orth_r1_Send_uart(handle);
-	handle->stateConfVector[0] = Statechart_main_orth_r1_Send_uart;
+	/* 'default' enter sequence for state Send_data_UART */
+	enact_main_Main_program_r1_Send_data_UART(handle);
+	handle->stateConfVector[0] = Statechart_main_Main_program_r1_Send_data_UART;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* 'default' enter sequence for state Oled */
-static void enseq_main_orth_r1_Oled_default(Statechart* handle)
+/* 'default' enter sequence for state Send_data_OLED */
+static void enseq_main_Main_program_r1_Send_data_OLED_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state Oled */
-	enact_main_orth_r1_Oled(handle);
-	handle->stateConfVector[0] = Statechart_main_orth_r1_Oled;
+	/* 'default' enter sequence for state Send_data_OLED */
+	enact_main_Main_program_r1_Send_data_OLED(handle);
+	handle->stateConfVector[0] = Statechart_main_Main_program_r1_Send_data_OLED;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* 'default' enter sequence for state normal_mode */
-static void enseq_main_orth_r2_normal_mode_default(Statechart* handle)
+/* 'default' enter sequence for state Regular_mode */
+static void enseq_main_Main_program_r2_Regular_mode_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state normal_mode */
-	enact_main_orth_r2_normal_mode(handle);
-	handle->stateConfVector[1] = Statechart_main_orth_r2_normal_mode;
+	/* 'default' enter sequence for state Regular_mode */
+	enact_main_Main_program_r2_Regular_mode(handle);
+	handle->stateConfVector[1] = Statechart_main_Main_program_r2_Regular_mode;
 	handle->stateConfVectorPosition = 1;
 }
 
-/* 'default' enter sequence for state high_speed_mode */
-static void enseq_main_orth_r2_high_speed_mode_default(Statechart* handle)
+/* 'default' enter sequence for state High_speed_mode */
+static void enseq_main_Main_program_r2_High_speed_mode_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state high_speed_mode */
-	enact_main_orth_r2_high_speed_mode(handle);
-	handle->stateConfVector[1] = Statechart_main_orth_r2_high_speed_mode;
+	/* 'default' enter sequence for state High_speed_mode */
+	enact_main_Main_program_r2_High_speed_mode(handle);
+	handle->stateConfVector[1] = Statechart_main_Main_program_r2_High_speed_mode;
 	handle->stateConfVectorPosition = 1;
 }
 
-/* 'default' enter sequence for state low_light_mode */
-static void enseq_main_orth_r2_low_light_mode_default(Statechart* handle)
+/* 'default' enter sequence for state Low_light_mode */
+static void enseq_main_Main_program_r2_Low_light_mode_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state low_light_mode */
-	enact_main_orth_r2_low_light_mode(handle);
-	handle->stateConfVector[1] = Statechart_main_orth_r2_low_light_mode;
+	/* 'default' enter sequence for state Low_light_mode */
+	enact_main_Main_program_r2_Low_light_mode(handle);
+	handle->stateConfVector[1] = Statechart_main_Main_program_r2_Low_light_mode;
 	handle->stateConfVectorPosition = 1;
 }
 
-/* 'default' enter sequence for state welcome */
-static void enseq_main_welcome_default(Statechart* handle)
+/* 'default' enter sequence for state Welcome_page */
+static void enseq_main_Welcome_page_default(Statechart* handle)
 {
-	/* 'default' enter sequence for state welcome */
-	enact_main_welcome(handle);
-	handle->stateConfVector[0] = Statechart_main_welcome;
+	/* 'default' enter sequence for state Welcome_page */
+	enact_main_Welcome_page(handle);
+	handle->stateConfVector[0] = Statechart_main_Welcome_page;
 	handle->stateConfVectorPosition = 0;
 }
 
@@ -655,87 +654,87 @@ static void enseq_main_default(Statechart* handle)
 	react_main__entry_Default(handle);
 }
 
-/* Default exit sequence for state screen */
-static void exseq_main_orth_r1_screen(Statechart* handle)
+/* Default exit sequence for state Display_mode_type */
+static void exseq_main_Main_program_r1_Display_mode_type(Statechart* handle)
 {
-	/* Default exit sequence for state screen */
-	handle->stateConfVector[0] = Statechart_main_orth;
+	/* Default exit sequence for state Display_mode_type */
+	handle->stateConfVector[0] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* Default exit sequence for state Wait for timer */
-static void exseq_main_orth_r1_Wait_for_timer(Statechart* handle)
+/* Default exit sequence for state Wait_for_timer */
+static void exseq_main_Main_program_r1_Wait_for_timer(Statechart* handle)
 {
-	/* Default exit sequence for state Wait for timer */
-	handle->stateConfVector[0] = Statechart_main_orth;
+	/* Default exit sequence for state Wait_for_timer */
+	handle->stateConfVector[0] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* Default exit sequence for state Read I2C */
-static void exseq_main_orth_r1_Read_I2C(Statechart* handle)
+/* Default exit sequence for state Read_I2C_sensors */
+static void exseq_main_Main_program_r1_Read_I2C_sensors(Statechart* handle)
 {
-	/* Default exit sequence for state Read I2C */
-	handle->stateConfVector[0] = Statechart_main_orth;
+	/* Default exit sequence for state Read_I2C_sensors */
+	handle->stateConfVector[0] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* Default exit sequence for state Process I2C */
-static void exseq_main_orth_r1_Process_I2C(Statechart* handle)
+/* Default exit sequence for state Process_I2C_samples */
+static void exseq_main_Main_program_r1_Process_I2C_samples(Statechart* handle)
 {
-	/* Default exit sequence for state Process I2C */
-	handle->stateConfVector[0] = Statechart_main_orth;
+	/* Default exit sequence for state Process_I2C_samples */
+	handle->stateConfVector[0] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 0;
-	exact_main_orth_r1_Process_I2C(handle);
+	exact_main_Main_program_r1_Process_I2C_samples(handle);
 }
 
-/* Default exit sequence for state Send uart */
-static void exseq_main_orth_r1_Send_uart(Statechart* handle)
+/* Default exit sequence for state Send_data_UART */
+static void exseq_main_Main_program_r1_Send_data_UART(Statechart* handle)
 {
-	/* Default exit sequence for state Send uart */
-	handle->stateConfVector[0] = Statechart_main_orth;
+	/* Default exit sequence for state Send_data_UART */
+	handle->stateConfVector[0] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 0;
-	exact_main_orth_r1_Send_uart(handle);
+	exact_main_Main_program_r1_Send_data_UART(handle);
 }
 
-/* Default exit sequence for state Oled */
-static void exseq_main_orth_r1_Oled(Statechart* handle)
+/* Default exit sequence for state Send_data_OLED */
+static void exseq_main_Main_program_r1_Send_data_OLED(Statechart* handle)
 {
-	/* Default exit sequence for state Oled */
-	handle->stateConfVector[0] = Statechart_main_orth;
+	/* Default exit sequence for state Send_data_OLED */
+	handle->stateConfVector[0] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 0;
 }
 
-/* Default exit sequence for state normal_mode */
-static void exseq_main_orth_r2_normal_mode(Statechart* handle)
+/* Default exit sequence for state Regular_mode */
+static void exseq_main_Main_program_r2_Regular_mode(Statechart* handle)
 {
-	/* Default exit sequence for state normal_mode */
-	handle->stateConfVector[1] = Statechart_main_orth;
+	/* Default exit sequence for state Regular_mode */
+	handle->stateConfVector[1] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 1;
-	exact_main_orth_r2_normal_mode(handle);
+	exact_main_Main_program_r2_Regular_mode(handle);
 }
 
-/* Default exit sequence for state high_speed_mode */
-static void exseq_main_orth_r2_high_speed_mode(Statechart* handle)
+/* Default exit sequence for state High_speed_mode */
+static void exseq_main_Main_program_r2_High_speed_mode(Statechart* handle)
 {
-	/* Default exit sequence for state high_speed_mode */
-	handle->stateConfVector[1] = Statechart_main_orth;
+	/* Default exit sequence for state High_speed_mode */
+	handle->stateConfVector[1] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 1;
-	exact_main_orth_r2_high_speed_mode(handle);
+	exact_main_Main_program_r2_High_speed_mode(handle);
 }
 
-/* Default exit sequence for state low_light_mode */
-static void exseq_main_orth_r2_low_light_mode(Statechart* handle)
+/* Default exit sequence for state Low_light_mode */
+static void exseq_main_Main_program_r2_Low_light_mode(Statechart* handle)
 {
-	/* Default exit sequence for state low_light_mode */
-	handle->stateConfVector[1] = Statechart_main_orth;
+	/* Default exit sequence for state Low_light_mode */
+	handle->stateConfVector[1] = Statechart_main_Main_program;
 	handle->stateConfVectorPosition = 1;
-	exact_main_orth_r2_low_light_mode(handle);
+	exact_main_Main_program_r2_Low_light_mode(handle);
 }
 
-/* Default exit sequence for state welcome */
-static void exseq_main_welcome(Statechart* handle)
+/* Default exit sequence for state Welcome_page */
+static void exseq_main_Welcome_page(Statechart* handle)
 {
-	/* Default exit sequence for state welcome */
+	/* Default exit sequence for state Welcome_page */
 	handle->stateConfVector[0] = Statechart_last_state;
 	handle->stateConfVectorPosition = 0;
 }
@@ -747,39 +746,39 @@ static void exseq_main(Statechart* handle)
 	/* Handle exit of all possible states (of Statechart.main) at position 0... */
 	switch(handle->stateConfVector[ 0 ])
 	{
-		case Statechart_main_orth_r1_screen :
+		case Statechart_main_Main_program_r1_Display_mode_type :
 		{
-			exseq_main_orth_r1_screen(handle);
+			exseq_main_Main_program_r1_Display_mode_type(handle);
 			break;
 		}
-		case Statechart_main_orth_r1_Wait_for_timer :
+		case Statechart_main_Main_program_r1_Wait_for_timer :
 		{
-			exseq_main_orth_r1_Wait_for_timer(handle);
+			exseq_main_Main_program_r1_Wait_for_timer(handle);
 			break;
 		}
-		case Statechart_main_orth_r1_Read_I2C :
+		case Statechart_main_Main_program_r1_Read_I2C_sensors :
 		{
-			exseq_main_orth_r1_Read_I2C(handle);
+			exseq_main_Main_program_r1_Read_I2C_sensors(handle);
 			break;
 		}
-		case Statechart_main_orth_r1_Process_I2C :
+		case Statechart_main_Main_program_r1_Process_I2C_samples :
 		{
-			exseq_main_orth_r1_Process_I2C(handle);
+			exseq_main_Main_program_r1_Process_I2C_samples(handle);
 			break;
 		}
-		case Statechart_main_orth_r1_Send_uart :
+		case Statechart_main_Main_program_r1_Send_data_UART :
 		{
-			exseq_main_orth_r1_Send_uart(handle);
+			exseq_main_Main_program_r1_Send_data_UART(handle);
 			break;
 		}
-		case Statechart_main_orth_r1_Oled :
+		case Statechart_main_Main_program_r1_Send_data_OLED :
 		{
-			exseq_main_orth_r1_Oled(handle);
+			exseq_main_Main_program_r1_Send_data_OLED(handle);
 			break;
 		}
-		case Statechart_main_welcome :
+		case Statechart_main_Welcome_page :
 		{
-			exseq_main_welcome(handle);
+			exseq_main_Welcome_page(handle);
 			break;
 		}
 		default: 
@@ -789,19 +788,19 @@ static void exseq_main(Statechart* handle)
 	/* Handle exit of all possible states (of Statechart.main) at position 1... */
 	switch(handle->stateConfVector[ 1 ])
 	{
-		case Statechart_main_orth_r2_normal_mode :
+		case Statechart_main_Main_program_r2_Regular_mode :
 		{
-			exseq_main_orth_r2_normal_mode(handle);
+			exseq_main_Main_program_r2_Regular_mode(handle);
 			break;
 		}
-		case Statechart_main_orth_r2_high_speed_mode :
+		case Statechart_main_Main_program_r2_High_speed_mode :
 		{
-			exseq_main_orth_r2_high_speed_mode(handle);
+			exseq_main_Main_program_r2_High_speed_mode(handle);
 			break;
 		}
-		case Statechart_main_orth_r2_low_light_mode :
+		case Statechart_main_Main_program_r2_Low_light_mode :
 		{
-			exseq_main_orth_r2_low_light_mode(handle);
+			exseq_main_Main_program_r2_Low_light_mode(handle);
 			break;
 		}
 		default: 
@@ -811,7 +810,7 @@ static void exseq_main(Statechart* handle)
 }
 
 /* The reactions of state null. */
-static void react_main_orth_r1__choice_2(Statechart* handle)
+static void react_main_Main_program_r1__choice_2(Statechart* handle)
 {
 	/* The reactions of state null. */
 	if ((handle->internal.mode_transition) == (1))
@@ -819,10 +818,10 @@ static void react_main_orth_r1__choice_2(Statechart* handle)
 		statechart_internal_set_mode_transition(handle, 0);
 		statechart_internal_set_sample_no(handle, 0);
 		statechart_internal_set_iterration_number(handle, 0);
-		enseq_main_orth_r1_screen_default(handle);
+		enseq_main_Main_program_r1_Display_mode_type_default(handle);
 	}  else
 	{
-		enseq_main_orth_r1_Read_I2C_default(handle);
+		enseq_main_Main_program_r1_Read_I2C_sensors_default(handle);
 	}
 }
 
@@ -830,21 +829,21 @@ static void react_main_orth_r1__choice_2(Statechart* handle)
 static void react_main__entry_Default(Statechart* handle)
 {
 	/* Default react sequence for initial entry  */
-	enseq_main_welcome_default(handle);
+	enseq_main_Welcome_page_default(handle);
 }
 
 /* The reactions of state null. */
 static void react_main__sync0(Statechart* handle)
 {
 	/* The reactions of state null. */
-	enseq_main_orth_r1_screen_default(handle);
-	enseq_main_orth_r2_normal_mode_default(handle);
+	enseq_main_Main_program_r1_Display_mode_type_default(handle);
+	enseq_main_Main_program_r2_Regular_mode_default(handle);
 }
 
 
-static sc_integer main_orth_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state orth. */
+	/* The reactions of state Main_program. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_false)
 	{ 
@@ -853,9 +852,9 @@ static sc_integer main_orth_react(Statechart* handle, const sc_integer transitio
 	} return transitioned_after;
 }
 
-static sc_integer main_orth_r1_screen_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r1_Display_mode_type_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state screen. */
+	/* The reactions of state Display_mode_type. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_false)
 	{ 
@@ -863,18 +862,19 @@ static sc_integer main_orth_r1_screen_react(Statechart* handle, const sc_integer
 		{ 
 			if ((handle->internal.timer_counter) == (handle->internal.timer_required))
 			{ 
-				exseq_main_orth_r1_screen(handle);
+				exseq_main_Main_program_r1_Display_mode_type(handle);
 				statechart_internal_set_timer_counter(handle, 0);
 				statechart_start_program(handle);
-				enseq_main_orth_r1_Wait_for_timer_default(handle);
+				enseq_main_Main_program_r1_Wait_for_timer_default(handle);
 				transitioned_after = 0;
 			}  else
 			{
-				if ((handle->internal.mode_transition) == (1))
+				if (((handle->iface.timer_interrupt_raised) == bool_true) && (((handle->internal.mode_transition) == (1)) == bool_true))
 				{ 
-					exseq_main_orth_r1_screen(handle);
+					exseq_main_Main_program_r1_Display_mode_type(handle);
 					statechart_internal_set_mode_transition(handle, 0);
-					enseq_main_orth_r1_screen_default(handle);
+					statechart_internal_set_timer_counter(handle, 0);
+					enseq_main_Main_program_r1_Display_mode_type_default(handle);
 					transitioned_after = 0;
 				} 
 			}
@@ -891,9 +891,9 @@ static sc_integer main_orth_r1_screen_react(Statechart* handle, const sc_integer
 	} return transitioned_after;
 }
 
-static sc_integer main_orth_r1_Wait_for_timer_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r1_Wait_for_timer_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state Wait for timer. */
+	/* The reactions of state Wait_for_timer. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_false)
 	{ 
@@ -901,17 +901,17 @@ static sc_integer main_orth_r1_Wait_for_timer_react(Statechart* handle, const sc
 		{ 
 			if (handle->iface.timer_interrupt_raised == bool_true)
 			{ 
-				exseq_main_orth_r1_Wait_for_timer(handle);
-				react_main_orth_r1__choice_2(handle);
+				exseq_main_Main_program_r1_Wait_for_timer(handle);
+				react_main_Main_program_r1__choice_2(handle);
 				transitioned_after = 0;
 			} 
 		} 
 	} return transitioned_after;
 }
 
-static sc_integer main_orth_r1_Read_I2C_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r1_Read_I2C_sensors_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state Read I2C. */
+	/* The reactions of state Read_I2C_sensors. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_false)
 	{ 
@@ -919,86 +919,86 @@ static sc_integer main_orth_r1_Read_I2C_react(Statechart* handle, const sc_integ
 		{ 
 			if (handle->iface.i2c_callback_sensors_raised == bool_true)
 			{ 
-				exseq_main_orth_r1_Read_I2C(handle);
-				enseq_main_orth_r1_Process_I2C_default(handle);
+				exseq_main_Main_program_r1_Read_I2C_sensors(handle);
+				enseq_main_Main_program_r1_Process_I2C_samples_default(handle);
 				transitioned_after = 0;
 			} 
 		} 
 	} return transitioned_after;
 }
 
-static sc_integer main_orth_r1_Process_I2C_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r1_Process_I2C_samples_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state Process I2C. */
+	/* The reactions of state Process_I2C_samples. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_true)
 	{ 
-		/* Default exit sequence for state Process I2C */
-		handle->stateConfVector[0] = Statechart_main_orth;
+		/* Default exit sequence for state Process_I2C_samples */
+		handle->stateConfVector[0] = Statechart_main_Main_program;
 		handle->stateConfVectorPosition = 0;
-		exact_main_orth_r1_Process_I2C(handle);
+		exact_main_Main_program_r1_Process_I2C_samples(handle);
 		/* The reactions of state null. */
-		if ((handle->internal.sample_no) == (handle->iface.required_sample_no))
+		if ((handle->internal.sample_no) == (handle->internal.required_sample_no))
 		{ 
 			statechart_internal_set_sample_no(handle, 0);
-			enseq_main_orth_r1_Send_uart_default(handle);
+			enseq_main_Main_program_r1_Send_data_UART_default(handle);
 		}  else
 		{
-			if ((((handle->internal.iterration_number) == (9)) == bool_true) && (((handle->internal.sample_no) == ((handle->iface.required_sample_no - 1))) == bool_true))
+			if ((((handle->internal.iterration_number) == (9)) == bool_true) && (((handle->internal.sample_no) == ((handle->internal.required_sample_no - 1))) == bool_true))
 			{ 
 				statechart_prepare_oled_screen(handle);
-				enseq_main_orth_r1_Wait_for_timer_default(handle);
+				enseq_main_Main_program_r1_Wait_for_timer_default(handle);
 			}  else
 			{
-				enseq_main_orth_r1_Wait_for_timer_default(handle);
+				enseq_main_Main_program_r1_Wait_for_timer_default(handle);
 			}
 		}
 	} 
 	return transitioned_after;
 }
 
-static sc_integer main_orth_r1_Send_uart_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r1_Send_data_UART_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state Send uart. */
+	/* The reactions of state Send_data_UART. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_true)
 	{ 
-		/* Default exit sequence for state Send uart */
-		handle->stateConfVector[0] = Statechart_main_orth;
+		/* Default exit sequence for state Send_data_UART */
+		handle->stateConfVector[0] = Statechart_main_Main_program;
 		handle->stateConfVectorPosition = 0;
-		exact_main_orth_r1_Send_uart(handle);
+		exact_main_Main_program_r1_Send_data_UART(handle);
 		/* The reactions of state null. */
 		if ((handle->internal.iterration_number) == (10))
 		{ 
 			statechart_internal_set_iterration_number(handle, 0);
-			enseq_main_orth_r1_Oled_default(handle);
+			enseq_main_Main_program_r1_Send_data_OLED_default(handle);
 		}  else
 		{
-			enseq_main_orth_r1_Wait_for_timer_default(handle);
+			enseq_main_Main_program_r1_Wait_for_timer_default(handle);
 		}
 	} 
 	return transitioned_after;
 }
 
-static sc_integer main_orth_r1_Oled_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r1_Send_data_OLED_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state Oled. */
+	/* The reactions of state Send_data_OLED. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_true)
 	{ 
-		/* Default exit sequence for state Oled */
-		handle->stateConfVector[0] = Statechart_main_orth;
+		/* Default exit sequence for state Send_data_OLED */
+		handle->stateConfVector[0] = Statechart_main_Main_program;
 		handle->stateConfVectorPosition = 0;
-		/* 'default' enter sequence for state Wait for timer */
-		handle->stateConfVector[0] = Statechart_main_orth_r1_Wait_for_timer;
+		/* 'default' enter sequence for state Wait_for_timer */
+		handle->stateConfVector[0] = Statechart_main_Main_program_r1_Wait_for_timer;
 		handle->stateConfVectorPosition = 0;
 	} 
 	return transitioned_after;
 }
 
-static sc_integer main_orth_r2_normal_mode_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r2_Regular_mode_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state normal_mode. */
+	/* The reactions of state Regular_mode. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_false)
 	{ 
@@ -1006,10 +1006,10 @@ static sc_integer main_orth_r2_normal_mode_react(Statechart* handle, const sc_in
 		{ 
 			if (((handle->iface.user_button_raised) == bool_true) && (((handle->internal.transition_flag) == (1)) == bool_true))
 			{ 
-				exseq_main_orth_r2_normal_mode(handle);
+				exseq_main_Main_program_r2_Regular_mode(handle);
 				statechart_internal_set_transition_flag(handle, 0);
-				enseq_main_orth_r2_high_speed_mode_default(handle);
-				main_orth_react(handle,0);
+				enseq_main_Main_program_r2_High_speed_mode_default(handle);
+				main_Main_program_react(handle,0);
 				transitioned_after = 1;
 			} 
 		} 
@@ -1017,14 +1017,14 @@ static sc_integer main_orth_r2_normal_mode_react(Statechart* handle, const sc_in
 		if ((transitioned_after) == (transitioned_before))
 		{ 
 			/* then execute local reactions. */
-			transitioned_after = main_orth_react(handle,transitioned_before);
+			transitioned_after = main_Main_program_react(handle,transitioned_before);
 		} 
 	} return transitioned_after;
 }
 
-static sc_integer main_orth_r2_high_speed_mode_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r2_High_speed_mode_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state high_speed_mode. */
+	/* The reactions of state High_speed_mode. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_false)
 	{ 
@@ -1032,10 +1032,10 @@ static sc_integer main_orth_r2_high_speed_mode_react(Statechart* handle, const s
 		{ 
 			if (((handle->iface.user_button_raised) == bool_true) && (((handle->internal.transition_flag) == (1)) == bool_true))
 			{ 
-				exseq_main_orth_r2_high_speed_mode(handle);
+				exseq_main_Main_program_r2_High_speed_mode(handle);
 				statechart_internal_set_transition_flag(handle, 0);
-				enseq_main_orth_r2_low_light_mode_default(handle);
-				main_orth_react(handle,0);
+				enseq_main_Main_program_r2_Low_light_mode_default(handle);
+				main_Main_program_react(handle,0);
 				transitioned_after = 1;
 			} 
 		} 
@@ -1043,14 +1043,14 @@ static sc_integer main_orth_r2_high_speed_mode_react(Statechart* handle, const s
 		if ((transitioned_after) == (transitioned_before))
 		{ 
 			/* then execute local reactions. */
-			transitioned_after = main_orth_react(handle,transitioned_before);
+			transitioned_after = main_Main_program_react(handle,transitioned_before);
 		} 
 	} return transitioned_after;
 }
 
-static sc_integer main_orth_r2_low_light_mode_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Main_program_r2_Low_light_mode_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state low_light_mode. */
+	/* The reactions of state Low_light_mode. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_false)
 	{ 
@@ -1058,10 +1058,10 @@ static sc_integer main_orth_r2_low_light_mode_react(Statechart* handle, const sc
 		{ 
 			if (((handle->iface.user_button_raised) == bool_true) && (((handle->internal.transition_flag) == (1)) == bool_true))
 			{ 
-				exseq_main_orth_r2_low_light_mode(handle);
+				exseq_main_Main_program_r2_Low_light_mode(handle);
 				statechart_internal_set_transition_flag(handle, 0);
-				enseq_main_orth_r2_normal_mode_default(handle);
-				main_orth_react(handle,0);
+				enseq_main_Main_program_r2_Regular_mode_default(handle);
+				main_Main_program_react(handle,0);
 				transitioned_after = 1;
 			} 
 		} 
@@ -1069,14 +1069,14 @@ static sc_integer main_orth_r2_low_light_mode_react(Statechart* handle, const sc
 		if ((transitioned_after) == (transitioned_before))
 		{ 
 			/* then execute local reactions. */
-			transitioned_after = main_orth_react(handle,transitioned_before);
+			transitioned_after = main_Main_program_react(handle,transitioned_before);
 		} 
 	} return transitioned_after;
 }
 
-static sc_integer main_welcome_react(Statechart* handle, const sc_integer transitioned_before)
+static sc_integer main_Welcome_page_react(Statechart* handle, const sc_integer transitioned_before)
 {
-	/* The reactions of state welcome. */
+	/* The reactions of state Welcome_page. */
  			sc_integer transitioned_after = transitioned_before;
 	if (handle->doCompletion == bool_false)
 	{ 
@@ -1084,7 +1084,7 @@ static sc_integer main_welcome_react(Statechart* handle, const sc_integer transi
 		{ 
 			if (handle->iface.user_button_raised == bool_true)
 			{ 
-				exseq_main_welcome(handle);
+				exseq_main_Welcome_page(handle);
 				react_main__sync0(handle);
 				transitioned_after = 0;
 			} 

@@ -15,34 +15,36 @@ extern "C"
 This header defines prototypes for all functions that are required by the state machine implementation.
 
 This state machine makes use of operations declared in the state machines interface or internal scopes. Thus the function prototypes:
-- statechart_read_i2c_sensors
-- statechart_send_data_uart
-- statechart_send_data_oled
 - statechart_display_welcome_page
-- statechart_prepare_oled_screen
-- statechart_start_program
+- statechart_read_i2c_sensors
 - statechart_process_i2c_samples
 - statechart_process_data_oled
+- statechart_send_data_uart
+- statechart_zero_uart_sum
+- statechart_send_data_oled
+- statechart_zero_oled_sum
+- statechart_prepare_oled_screen
+- statechart_start_program
 - statechart_display_mode_type
 - statechart_change_timer_and_sensor
-- statechart_zero_data
 are defined.
 
 These functions will be called during a 'run to completion step' (runCycle) of the statechart. 
 There are some constraints that have to be considered for the implementation of these functions:
 - make sure that the execution time is as short as possible.
 */
-extern void statechart_read_i2c_sensors( Statechart* handle);
-extern void statechart_send_data_uart( Statechart* handle);
-extern void statechart_send_data_oled( Statechart* handle);
 extern void statechart_display_welcome_page( Statechart* handle);
-extern void statechart_prepare_oled_screen( Statechart* handle);
-extern void statechart_start_program( Statechart* handle);
+extern void statechart_read_i2c_sensors( Statechart* handle);
 extern void statechart_process_i2c_samples( Statechart* handle, const sc_integer sample_no, const sc_integer mode_type);
 extern void statechart_process_data_oled( Statechart* handle, const sc_integer required_sample_no, const sc_integer iterration_number);
+extern void statechart_send_data_uart( Statechart* handle);
+extern void statechart_zero_uart_sum( Statechart* handle);
+extern void statechart_send_data_oled( Statechart* handle);
+extern void statechart_zero_oled_sum( Statechart* handle);
+extern void statechart_prepare_oled_screen( Statechart* handle);
+extern void statechart_start_program( Statechart* handle);
 extern void statechart_display_mode_type( Statechart* handle, const sc_integer mode_type);
 extern void statechart_change_timer_and_sensor( Statechart* handle, const sc_integer mode_type);
-extern void statechart_zero_data( Statechart* handle);
 
 
 
