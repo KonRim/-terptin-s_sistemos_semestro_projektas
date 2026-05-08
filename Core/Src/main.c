@@ -314,12 +314,6 @@ void statechart_process_i2c_samples( Statechart* handle, const sc_integer sample
 	         uart_max[i] = normal_value[i]; //Becomes new max
 	     }
 	 }
-	 /*
-	 uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
-	 int len = 0;
-	 len = snprintf(msg, sizeof(msg), "\r\nLaikmacio verte:%lu ms \r\nMatavimo nr:%d \r\nCh1_value: %.4f \r\nCh2_value: %.4f \r\n ", timerValue, uart_counter, normal_value[0], normal_value[1]);
-	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
-	*/
 }
 
 //Function to send the required data over UART to PC
@@ -327,9 +321,6 @@ void statechart_send_data_uart(Statechart* handle){
 	//Local variables
 	int len = 0;
 	int precision[2];
-	//uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
-	//Add new line between each batch of measurements (each transition)
-	//len += snprintf(msg + len,sizeof(msg) - len, "\r\nLaikmacio verte:%lu ms\r\n", timerValue);
 	len += snprintf(msg + len,sizeof(msg) - len, "\r\n");
 
 	//For loop to loop over both channels
@@ -364,12 +355,6 @@ void statechart_send_data_uart(Statechart* handle){
 	//Transmit the formated message over UART with DMA
 	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0); //Reset the test LED
- /*
- uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
-		 int len = snprintf(msg, sizeof(msg), "\r\nTIMER VALUE: %lu \r\n ", timerValue);
-		//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
-*/
-
 }
 
 //Function to display required data on OLED display
@@ -417,24 +402,7 @@ void statechart_send_data_oled( Statechart* handle){
 		 SSD1306_GotoXY (35, 20+33*i); //Go to 35 and 20 or 53
 		 SSD1306_Puts (ch_max[i], &Font_7x10, 1); // print max value
 	 }
-
-	 /*uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
-
-	 uint32_t timervalue_2 = __HAL_TIM_GET_COUNTER(&htim7);
-
-	 		 int len = snprintf(msg, sizeof(msg), "\r\nLaikas pries ekrano atnaujinima: %lu \r\nLaikas po ekrano atnaujinimo: %lu \r\n", timerValue, timervalue_2);
-	 		 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
-
-	 *///		 __HAL_TIM_SET_COUNTER(&htim7, 0);
-
-
-	 //uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
-
-	  //int len = snprintf(msg, sizeof(msg), "\r\nOled laikmatis: %lu \r\n ", timerValue);
-	 //HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	 SSD1306_UpdateScreen(); //Update the screen
-	 //__HAL_TIM_SET_COUNTER(&htim7, 0);
-	 //uart_counter=0;
 }
 
 
@@ -468,13 +436,9 @@ void statechart_process_data_oled( Statechart* handle, const sc_integer required
 	 }
 }
 
-//Function to clear the old data from OLED display
-void statechart_prepare_oled_screen( Statechart* handle){
-	 //SSD1306_DrawFilledRectangle(35, 0, 75, 63, 0); //Block out old data
-	 //SSD1306_UpdateScreen(); //Update screen
-}
 
 
+//Function to display the screen while waiting for measurements/start timers
 void statechart_start_program( Statechart* handle){
 	//Heavy blocking write operations, stop timer before
 	HAL_TIM_Base_Stop_IT(&htim6);
@@ -499,9 +463,6 @@ void statechart_start_program( Statechart* handle){
 	 SSD1306_UpdateScreen(); // update screen
 	 __HAL_TIM_SET_COUNTER(&htim6, 0); //Reset counter (should be reset to 0 anyways, but good practice after update)
 	 HAL_TIM_Base_Start_IT(&htim6); //Restart counter after writing is done
-	 HAL_TIM_Base_Start_IT(&htim7);
-	 uart_counter=0;
-	 __HAL_TIM_SET_COUNTER(&htim7, 0);
 }
 /* USER CODE END 0 */
 
@@ -803,7 +764,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 460800;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;

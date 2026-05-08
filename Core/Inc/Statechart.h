@@ -132,7 +132,6 @@ struct StatechartInternal
 	sc_integer iterration_number;
 	sc_integer timer_required;
 	sc_integer timer_counter;
-	sc_integer frames_before;
 };
 
 

@@ -23,7 +23,6 @@ This state machine makes use of operations declared in the state machines interf
 - statechart_zero_uart_sum
 - statechart_send_data_oled
 - statechart_zero_oled_sum
-- statechart_prepare_oled_screen
 - statechart_start_program
 - statechart_display_mode_type
 - statechart_change_timer_and_sensor
@@ -41,7 +40,6 @@ extern void statechart_send_data_uart( Statechart* handle);
 extern void statechart_zero_uart_sum( Statechart* handle);
 extern void statechart_send_data_oled( Statechart* handle);
 extern void statechart_zero_oled_sum( Statechart* handle);
-extern void statechart_prepare_oled_screen( Statechart* handle);
 extern void statechart_start_program( Statechart* handle);
 extern void statechart_display_mode_type( Statechart* handle, const sc_integer mode_type);
 extern void statechart_change_timer_and_sensor( Statechart* handle, const sc_integer mode_type);

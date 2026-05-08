@@ -115,8 +115,6 @@ static void statechart_internal_set_timer_required(Statechart* handle, sc_intege
 ;
 static void statechart_internal_set_timer_counter(Statechart* handle, sc_integer value)
 ;
-static void statechart_internal_set_frames_before(Statechart* handle, sc_integer value)
-;
 
 
 static void statechart_eventqueue_init(statechart_eventqueue * eq, statechart_event *buffer, sc_integer capacity);
@@ -152,7 +150,6 @@ void statechart_init(Statechart* handle)
 	statechart_internal_set_iterration_number(handle, 0);
 	statechart_internal_set_timer_required(handle, 100);
 	statechart_internal_set_timer_counter(handle, 0);
-	statechart_internal_set_frames_before(handle, 1);
 	
 	handle->isExecuting = bool_false;
 	statechart_eventqueue_init(&handle->in_event_queue, handle->in_buffer, STATECHART_IN_EVENTQUEUE_BUFFERSIZE);
@@ -443,10 +440,6 @@ static void statechart_internal_set_timer_required(Statechart* handle, sc_intege
 static void statechart_internal_set_timer_counter(Statechart* handle, sc_integer value)
 {
 	handle->internal.timer_counter = value;
-}
-static void statechart_internal_set_frames_before(Statechart* handle, sc_integer value)
-{
-	handle->internal.frames_before = value;
 }
 
 
@@ -951,14 +944,7 @@ static sc_integer main_Main_program_r1_Process_I2C_samples_react(Statechart* han
 			enseq_main_Main_program_r1_Send_data_UART_default(handle);
 		}  else
 		{
-			if ((((handle->internal.iterration_number) == (9)) == bool_true) && (((handle->internal.sample_no) == ((handle->internal.required_sample_no - handle->internal.frames_before))) == bool_true))
-			{ 
-				statechart_prepare_oled_screen(handle);
-				enseq_main_Main_program_r1_Wait_for_timer_default(handle);
-			}  else
-			{
-				enseq_main_Main_program_r1_Wait_for_timer_default(handle);
-			}
+			enseq_main_Main_program_r1_Wait_for_timer_default(handle);
 		}
 	} 
 	return transitioned_after;
@@ -1015,7 +1001,6 @@ static sc_integer main_Main_program_r2_Regular_mode_react(Statechart* handle, co
 			{ 
 				exseq_main_Main_program_r2_Regular_mode(handle);
 				statechart_internal_set_transition_flag(handle, 0);
-				statechart_internal_set_frames_before(handle, 2);
 				enseq_main_Main_program_r2_High_speed_mode_default(handle);
 				main_Main_program_react(handle,0);
 				transitioned_after = 1;
@@ -1042,7 +1027,6 @@ static sc_integer main_Main_program_r2_High_speed_mode_react(Statechart* handle,
 			{ 
 				exseq_main_Main_program_r2_High_speed_mode(handle);
 				statechart_internal_set_transition_flag(handle, 0);
-				statechart_internal_set_frames_before(handle, 1);
 				enseq_main_Main_program_r2_Low_light_mode_default(handle);
 				main_Main_program_react(handle,0);
 				transitioned_after = 1;
