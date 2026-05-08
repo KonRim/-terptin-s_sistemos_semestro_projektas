@@ -316,13 +316,9 @@ void statechart_process_i2c_samples( Statechart* handle, const sc_integer sample
 	 }
 	 /*
 	 uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
-		 int len = snprintf(msg, sizeof(msg), "\r\nTIMER VALUE: %lu \r\n ", timerValue);
-		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
-	*/
-
-	 /*
-	 int len = snprintf(msg, sizeof(msg), "\r\nNormal value1: %.4f \r\nNormal value2: %.4f \r\n ", normal_value[0], normal_value[1]);
-	 		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
+	 int len = 0;
+	 len = snprintf(msg, sizeof(msg), "\r\nLaikmacio verte:%lu ms \r\nMatavimo nr:%d \r\nCh1_value: %.4f \r\nCh2_value: %.4f \r\n ", timerValue, uart_counter, normal_value[0], normal_value[1]);
+	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	*/
 }
 
@@ -331,9 +327,11 @@ void statechart_send_data_uart(Statechart* handle){
 	//Local variables
 	int len = 0;
 	int precision[2];
-
+	//uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
 	//Add new line between each batch of measurements (each transition)
+	//len += snprintf(msg + len,sizeof(msg) - len, "\r\nLaikmacio verte:%lu ms\r\n", timerValue);
 	len += snprintf(msg + len,sizeof(msg) - len, "\r\n");
+
 	//For loop to loop over both channels
 	for (int i = 0; i < CHANNEL_NUMBER; i++)
 	{
@@ -357,6 +355,8 @@ void statechart_send_data_uart(Statechart* handle){
 				break;
 		}
 		//Format the UART message from the data and precision values
+
+
 		len += snprintf(msg + len,sizeof(msg) - len,"Ch%d: %.*f\r\nMin: %.*f\r\nMax: %.*f\r\n",
 			i + 1, precision[i], average_sensor[i], precision[i], uart_min[i], precision[i], uart_max[i]);
 	}
@@ -379,7 +379,7 @@ void statechart_send_data_oled( Statechart* handle){
 	 char ch_min[2][50];
 	 char ch_max[2][50];
 	 int precision[2];
-
+	 SSD1306_DrawFilledRectangle(35, 0, 75, 63, 0); //Block out old data
 	 //Set for loop to format both channels
 	 for (int i=0; i<CHANNEL_NUMBER; i++){
 		 average_oled[i]=sum_sensor_oled[i]/10.0f;
@@ -418,15 +418,23 @@ void statechart_send_data_oled( Statechart* handle){
 		 SSD1306_Puts (ch_max[i], &Font_7x10, 1); // print max value
 	 }
 
+	 /*uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
+
+	 uint32_t timervalue_2 = __HAL_TIM_GET_COUNTER(&htim7);
+
+	 		 int len = snprintf(msg, sizeof(msg), "\r\nLaikas pries ekrano atnaujinima: %lu \r\nLaikas po ekrano atnaujinimo: %lu \r\n", timerValue, timervalue_2);
+	 		 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
+
+	 *///		 __HAL_TIM_SET_COUNTER(&htim7, 0);
+
+
+	 //uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
+
+	  //int len = snprintf(msg, sizeof(msg), "\r\nOled laikmatis: %lu \r\n ", timerValue);
+	 //HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
 	 SSD1306_UpdateScreen(); //Update the screen
-
-	 /*
-	 uint32_t timerValue = __HAL_TIM_GET_COUNTER(&htim7);
-
-	 int len = snprintf(msg, sizeof(msg), "\r\nuart VALUE: %d \r\n ", timerValue);
-	 HAL_UART_Transmit_DMA(&huart2, (uint8_t*)msg, len);
-	 __HAL_TIM_SET_COUNTER(&htim7, 0);
-	 */
+	 //__HAL_TIM_SET_COUNTER(&htim7, 0);
+	 //uart_counter=0;
 }
 
 
@@ -442,25 +450,28 @@ void statechart_process_data_oled( Statechart* handle, const sc_integer required
 		 sum_sensor_oled[i] = sum_sensor_oled[i] + average_sensor[i];
 
 		 //Check min max values
-	     if (iterration_number == 0) { //If first iterration
-	         oled_min[i] = uart_min[i]; //Set oled min to uart min
-	         oled_max[i] = uart_max[i]; //And oled max to uart max
-	     }
-	     //Otherwise, check if current min is lower than iterration min
-	     else if (uart_min[i] < oled_min[i]) {
-	         oled_min[i] = uart_min[i]; //Set new itteration min
-	     }
-	     //And if current max is higher than iterration max
-	     if (uart_max[i] > oled_max[i]) {
-	         oled_max[i] = uart_max[i]; //Set new iterration max
-	     }
+		 //If we have first iteration, oled_min is min, oled_max is max
+		 if (iterration_number == 0) {
+		     oled_min[i] = uart_min[i];
+		     oled_max[i] = uart_max[i];
+		 }
+		 //If not first iteration, check if new min/max is smaller/bigger than current min/max
+		 else {
+		     if (uart_min[i] < oled_min[i]) {
+		         oled_min[i] = uart_min[i];
+		     }
+
+		     if (uart_max[i] > oled_max[i]) {
+		         oled_max[i] = uart_max[i];
+		     }
+		 }
 	 }
 }
 
 //Function to clear the old data from OLED display
 void statechart_prepare_oled_screen( Statechart* handle){
-	 SSD1306_DrawFilledRectangle(35, 0, 75, 63, 0); //Block out old data
-	 SSD1306_UpdateScreen(); //Update screen
+	 //SSD1306_DrawFilledRectangle(35, 0, 75, 63, 0); //Block out old data
+	 //SSD1306_UpdateScreen(); //Update screen
 }
 
 
@@ -488,6 +499,9 @@ void statechart_start_program( Statechart* handle){
 	 SSD1306_UpdateScreen(); // update screen
 	 __HAL_TIM_SET_COUNTER(&htim6, 0); //Reset counter (should be reset to 0 anyways, but good practice after update)
 	 HAL_TIM_Base_Start_IT(&htim6); //Restart counter after writing is done
+	 HAL_TIM_Base_Start_IT(&htim7);
+	 uart_counter=0;
+	 __HAL_TIM_SET_COUNTER(&htim7, 0);
 }
 /* USER CODE END 0 */
 
@@ -529,7 +543,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   //For debugging
-  HAL_TIM_Base_Start_IT(&htim7);
 
   SSD1306_Init (); // initialise the display
 
@@ -790,7 +803,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 460800;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
